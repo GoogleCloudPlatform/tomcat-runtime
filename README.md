@@ -1,7 +1,7 @@
 Base image for an App Engine custom runtime using Apache Tomcat 8.
 This project is still in initial development and features may change at any time.
 Please use the [issue tracker](https://github.com/GoogleCloudPlatform/appengine-container-tomcat/issues)
-for feedback and suggestions.
+for feedback and suggestions. Please see [this doc](CONTRIBUTING.md) for information on contributing.
 
 To use this pre-release version you will need to build the container image yourself. Make sure
 you have Apache Maven installed and Docker is running, then run:
