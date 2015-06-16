@@ -1,6 +1,19 @@
-Base image for App Engine managed VM using Apache Tomcat 8.
+Base image for an App Engine custom runtime using Apache Tomcat 8.
+This project is still in initial development and features may change at any time.
+Please use the [issue tracker](https://github.com/GoogleCloudPlatform/appengine-container-tomcat/issues)
+for feedback and suggestions.
 
-Sample Dockerfile to add an application as the ROOT Context:
+To use this pre-release version you will need to build the container image yourself. Make sure
+you have Apache Maven installed and Docker is running, then run:
+
+```
+$ mvn package docker:package
+```
+
+This will compile the support libraries and create a local Docker image tagged `appengine-tomcat`
+
+To use this image and set your application as the ROOT Context, add the following Dockerfile
+to the root of an exploded web application:
 
 ```Dockerfile
 FROM appengine-tomcat
@@ -8,7 +21,7 @@ ADD . ROOT
 ```
 
 This initial version simply sets up logging and ports for a simple application. Additional work
-is required to support:
+is required to support features such as:
 
  * Session persistence with replication across servers.
  * Container-managed authentication.
@@ -16,6 +29,8 @@ is required to support:
  * API authorization using the system role account.
  * Sending JVM and Tomcat statistics to Google Cloud Monitoring (collectd).
  * Direct integration with Google Cloud Logging (fluentd).
+
+Please see the [issue tracker](https://github.com/GoogleCloudPlatform/appengine-container-tomcat/issues) for more details.
 
 Changes made to the default configuration:
 
