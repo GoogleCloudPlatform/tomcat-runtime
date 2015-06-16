@@ -3,14 +3,20 @@ This project is still in initial development and features may change at any time
 Please use the [issue tracker](https://github.com/GoogleCloudPlatform/appengine-container-tomcat/issues)
 for feedback and suggestions. Please see [this doc](CONTRIBUTING.md) for information on contributing.
 
-To use this pre-release version you will need to build the container image yourself. Make sure
-you have Apache Maven installed and Docker is running, then run:
+To use this pre-release version you will need to build the container image yourself.
+Make sure you have Apache Maven installed and you can run `docker` commands.
+To compile the support libraries and create a local Docker image tagged `appengine-tomcat`:
 
-```
+```sh
 $ mvn package docker:package
 ```
 
-This will compile the support libraries and create a local Docker image tagged `appengine-tomcat`
+The `docker-maven-plugin` defaults to using the HTTPS transport. If you are using `boot2docker`
+or have configured the docker daemon to listen on that port this should be fine. If you get an error
+about `https protocol is not supported` then try setting the `DOCKER_URL` environment variable:
+```sh
+$ export DOCKER_URL=unix:///var/run/docker.sock
+```
 
 To use this image and set your application as the ROOT Context, add the following Dockerfile
 to the root of an exploded web application:
