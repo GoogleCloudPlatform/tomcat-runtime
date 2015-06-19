@@ -18,43 +18,42 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
+  <packaging>war</packaging>
 
   <groupId>com.google.appengine</groupId>
-  <artifactId>appengine-container-tomcat</artifactId>
+  <artifactId>docker-test</artifactId>
   <version>0.1-SNAPSHOT</version>
+
+  <description>Tests that the Tomcat image runs in a local Docker container</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <tomcat.version>8.0.23</tomcat.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.tomcat</groupId>
-      <artifactId>tomcat-catalina</artifactId>
-      <version>${tomcat.version}</version>
+      <artifactId>tomcat-servlet-api</artifactId>
+      <version>8.0.23</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.12</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>1.8.5</version>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
         <version>3.3</version>
+        <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
@@ -62,39 +61,58 @@
       </plugin>
 
       <plugin>
-        <groupId>com.alexecollins.docker</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>2.9.2</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.6</version>
         <configuration>
-          <removeIntermediateImages>true</removeIntermediateImages>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
-        <executions>
-          <execution>
-            <goals>
-              <goal>clean</goal>
-              <goal>package</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
-        <artifactId>maven-invoker-plugin</artifactId>
-        <version>1.10</version>
+        <groupId>com.alexecollins.docker</groupId>
+        <artifactId>docker-maven-plugin</artifactId>
+        <version>2.9.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>validate</goal>
+              <goal>clean</goal>
+              <goal>package</goal>
+              <goal>start</goal>
+              <goal>stop</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <!-- set-up port forwarding if you're using boot2docker -->
+            <groupId>com.alexecollins.docker</groupId>
+            <artifactId>docker-java-orchestration-plugin-boot2docker</artifactId>
+            <version>2.9.2</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>2.18.1</version>
         <configuration>
-          <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-          <localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+          <systemPropertyVariables>
+            <app.url>http://localhost:8080</app.url>
+          </systemPropertyVariables>
         </configuration>
         <executions>
           <execution>
-            <id>integration-test</id>
             <goals>
-              <goal>install</goal>
-              <goal>run</goal>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
             </goals>
           </execution>
         </executions>
       </plugin>
     </plugins>
+
   </build>
+
 </project>
