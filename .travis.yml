@@ -17,3 +17,5 @@ language: java
 jdk:
   - oraclejdk8
 script: mvn verify
+env:
+  - DOCKER_URL=unix:///var/run/docker.sock
