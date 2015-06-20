@@ -30,6 +30,7 @@ before_install:
 
 install:
   - sudo apt-get -qqy update
+  - sudo apt-get -qqy install slirp
   - wget -qO- https://get.docker.com/ | sh
   - sudo sudo usermod -aG docker "$USER"
   - git clone git://github.com/cptactionhank/sekexe
