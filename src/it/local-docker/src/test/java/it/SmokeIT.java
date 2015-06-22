@@ -16,36 +16,23 @@
  */
 package it;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URI;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class SmokeIT {
 
-    private static final URI base;
-    static {
-        base = URI.create(System.getProperty("app.url"));
-    }
-
     @Test
     public void canConnect() throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) base.toURL().openConnection();
-        assertEquals(200, connection.getResponseCode());
+        assertTrue(RequestUtils.ping());
     }
 
     @Test
     public void canUseJSP() throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) base.resolve("/hello.jsp").toURL().openConnection();
-        assertEquals(200, connection.getResponseCode());
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-            reader.readLine();
-            assertEquals("Hello JSP", reader.readLine());
-        }
+        assertThat(RequestUtils.responseText("/hello.jsp"), containsString("Hello JSP"));
     }
 }
