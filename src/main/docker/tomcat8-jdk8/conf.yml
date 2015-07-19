@@ -16,6 +16,6 @@
 
 packaging:
   add:
-    - target/${project.build.finalName}.jar
+    - target/tomcat-home
 
 tag: appengine-tomcat
