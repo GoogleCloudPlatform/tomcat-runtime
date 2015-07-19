@@ -34,11 +34,27 @@
       <directory>${project.basedir}/src/assembly/conf</directory>
       <outputDirectory>conf</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/assembly/bin</directory>
+      <outputDirectory>bin</outputDirectory>
+    </fileSet>
   </fileSets>
   <dependencySets>
     <!-- TODO: Shade the dependencies to avoid conflict with user applications -->
     <dependencySet>
       <outputDirectory>lib</outputDirectory>
+      <excludes>
+        <exclude>com.google.appengine:appengine-runtime-java8-logging</exclude>
+      </excludes>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
+    </dependencySet>
+    <dependencySet>
+      <outputDirectory>bin</outputDirectory>
+      <includes>
+        <include>com.google.appengine:appengine-runtime-java8-logging</include>
+      </includes>
+      <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+      <useTransitiveFiltering>true</useTransitiveFiltering>
     </dependencySet>
   </dependencySets>
 </assembly>
