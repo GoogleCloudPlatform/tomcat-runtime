@@ -2,7 +2,7 @@
 
 [![experimental](http://badges.github.io/stability-badges/dist/experimental.svg)](http://github.com/badges/stability-badges)
 
-This repository contains the source for the Google-maintained Jetty [docker](https://docker.com) image.
+This repository contains the source for the Google-maintained Tomcat [docker](https://docker.com) image.
 
 ## Contributing changes
 
