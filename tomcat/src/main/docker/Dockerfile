@@ -13,19 +13,12 @@
 # limitations under the License.
 FROM ${docker.openjdk.image}
 
-# Create tomcat group and user
-RUN groupadd -r tomcat \
- && useradd -r -g tomcat tomcat
-
 # Environment variable for tomcat
 ENV CATALINA_HOME ${tomcat.home}
-RUN mkdir -p $CATALINA_HOME
 
 # Create Tomcat home
-ADD tomcat-home $CATALINA_HOME
-RUN chmod +x ${CATALINA_HOME}/bin/startup.sh ${CATALINA_HOME}/bin/catalina.sh \
-    && mkdir ${CATALINA_HOME}/logs \
-    && chown -R tomcat:tomcat $CATALINA_HOME
+COPY tomcat-home $CATALINA_HOME
+RUN chmod +x ${CATALINA_HOME}/bin/startup.sh ${CATALINA_HOME}/bin/catalina.sh
 
 
 EXPOSE 8080
