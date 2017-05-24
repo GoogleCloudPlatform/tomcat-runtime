@@ -1,13 +1,7 @@
 # maven
 target
 
-# common junk
-*.log
-*.diff
-
 # intellij / idea
 *.iml
-*.ipr
-*.iws
 .idea
 
