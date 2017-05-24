@@ -18,7 +18,7 @@ ENV CATALINA_HOME ${tomcat.home}
 
 # Create Tomcat home
 COPY tomcat-home $CATALINA_HOME
-RUN ${CATALINA_HOME}/bin/catalina.sh
+RUN chmod +x ${CATALINA_HOME}/bin/catalina.sh
 
 # Create Tomcat base
 ENV CATALINA_BASE ${tomcat.base}
