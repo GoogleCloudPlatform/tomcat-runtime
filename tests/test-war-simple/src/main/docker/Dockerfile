@@ -1,2 +1,2 @@
-FROM tomcat:9
-ADD app.war $CATALINA_HOME/webapps/root.war
+FROM tomcat:${docker.tag.long}
+ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war

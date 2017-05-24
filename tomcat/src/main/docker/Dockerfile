@@ -25,7 +25,7 @@ ENV CATALINA_BASE ${tomcat.base}
 RUN mkdir -p $CATALINA_BASE/webapps
 RUN mkdir -p $CATALINA_BASE/temp
 RUN mkdir -p $CATALINA_BASE/conf
-#RUN cp -R $CATALINA_HOME/webapps/* $CATALINA_BASE/webapps
+# TODO (cassand): This configuration might come from a different module in the project (tomcat-base)
 RUN cp -R $CATALINA_HOME/conf/* $CATALINA_BASE/conf
 
 EXPOSE 8080
