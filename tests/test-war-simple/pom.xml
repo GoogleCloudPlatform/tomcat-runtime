@@ -35,7 +35,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/docker</outputDirectory>
+              <outputDirectory>${project.build.directory}/docker-src</outputDirectory>
               <resources>
                 <resource>
                   <directory>${basedir}/src/main/docker</directory>
@@ -49,11 +49,11 @@
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
         <configuration>
-          <outputDirectory>${project.build.directory}/docker</outputDirectory>
+          <outputDirectory>${project.build.directory}/docker-src</outputDirectory>
         </configuration>
       </plugin>
       <plugin>
-        <groupId>com.spotify</groupId>
+        <groupId>io.fabric8</groupId>
         <artifactId>docker-maven-plugin</artifactId>
         <executions>
           <execution>
@@ -63,11 +63,17 @@
               <goal>build</goal>
             </goals>
             <configuration>
-              <imageName>${project.artifactId}</imageName>
-              <imageTags>
-                <imageTag>${project.version}</imageTag>
-              </imageTags>
-              <dockerDirectory>${project.build.directory}/docker</dockerDirectory>
+              <images>
+                <image>
+                  <name>${project.artifactId}</name>
+                  <build>
+                    <dockerFileDir>${project.build.directory}/docker-src</dockerFileDir>
+                    <tags>
+                      <tag>${project.version}</tag>
+                    </tags>
+                  </build>
+                </image>
+              </images>
             </configuration>
           </execution>
         </executions>
