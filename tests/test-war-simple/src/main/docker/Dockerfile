@@ -11,5 +11,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-FROM tomcat:${docker.tag.long}
+FROM ${docker.image.name}:${docker.tag.long}
 ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
