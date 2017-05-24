@@ -1,0 +1,16 @@
+sudo: required
+
+languages: java
+
+services:
+  - docker
+
+jdk:
+  - oraclejdk8
+
+branches:
+  only:
+  - master
+
+script:
+  - mvn clean verify -B -V -q
