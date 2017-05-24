@@ -9,11 +9,11 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <name>Google Tomcat Runtime Docker Image</name>
-  <artifactId>tomcat9</artifactId>
+  <artifactId>tomcat</artifactId>
   <packaging>pom</packaging>
 
   <properties>
-    <tomcat.home>/opt/tomcat-home</tomcat.home>
+    <tomcat.home>/usr/local/tomcat</tomcat.home>
   </properties>
 
   <profiles>
@@ -68,7 +68,7 @@
                 <artifactItem>
                   <groupId>org.apache.tomcat</groupId>
                   <artifactId>tomcat</artifactId>
-                  <version>9.0.0.M21</version>
+                  <version>${tomcat.version}</version>
                   <type>tar.gz</type>
                   <overWrite>true</overWrite>
                   <includes>**</includes>
@@ -109,7 +109,7 @@
               <outputDirectory>${project.build.directory}/docker/tomcat-home</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${project.build.directory}/apache-tomcat-${tomcat9.version}</directory>
+                  <directory>${project.build.directory}/apache-tomcat-${tomcat.version}</directory>
                   <filtering>false</filtering>\
                   <includes>
                     <include>**</include>
@@ -120,7 +120,6 @@
           </execution>
         </executions>
       </plugin>
-
 
 
     </plugins>

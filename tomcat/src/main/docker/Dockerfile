@@ -6,6 +6,7 @@ RUN groupadd -r tomcat \
 
 # Environment variable for tomcat
 ENV CATALINA_HOME ${tomcat.home}
+RUN mkdir -p $CATALINA_HOME
 
 # Create Tomcat home
 ADD tomcat-home $CATALINA_HOME
