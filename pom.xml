@@ -41,6 +41,7 @@
 
   <modules>
     <module>tomcat</module>
+    <module>tests/test-war-simple</module>
   </modules>
 
   <build>
