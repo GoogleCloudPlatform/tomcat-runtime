@@ -29,6 +29,7 @@
 
   <properties>
     <tomcat.home>/usr/local/tomcat</tomcat.home>
+    <tomcat.base>/var/lib/tomcat</tomcat.base>
   </properties>
 
   <profiles>

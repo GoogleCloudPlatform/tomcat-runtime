@@ -20,6 +20,13 @@ ENV CATALINA_HOME ${tomcat.home}
 COPY tomcat-home $CATALINA_HOME
 RUN chmod +x ${CATALINA_HOME}/bin/startup.sh ${CATALINA_HOME}/bin/catalina.sh
 
+# Create Tomcat base
+ENV CATALINA_BASE ${tomcat.base}
+RUN mkdir -p $CATALINA_BASE/webapps
+RUN mkdir -p $CATALINA_BASE/temp
+RUN mkdir -p $CATALINA_BASE/conf
+RUN cp -R $CATALINA_HOME/webapps/* $CATALINA_BASE/webapps
+RUN cp -R $CATALINA_HOME/conf/* $CATALINA_BASE/conf
 
 EXPOSE 8080
 CMD ["/bin/bash", "${tomcat.home}/bin/catalina.sh", "run"]
