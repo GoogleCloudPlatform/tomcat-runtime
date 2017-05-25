@@ -1,0 +1,23 @@
+schemaVersion: 1.0.0
+
+fileExistenceTests:
+- name: 'Tomcat home exists'
+  path: '${tomcat.home}'
+  isDirectory: true
+  shouldExist: true
+- name: 'Catalina script exists'
+  path: '${tomcat.home}/bin/catalina.sh'
+  isDirectory: false
+  shouldExist: true
+- name: 'Tomcat base exists'
+  path: '${tomcat.base}'
+  isDirectory: true
+  shouldExist: true
+- name: 'Webapps directory exists'
+  path: '${tomcat.base}/webapps'
+  isDirectory: true
+  shouldExist: true
+
+licenseTests:
+- debian: true
+  files: []
