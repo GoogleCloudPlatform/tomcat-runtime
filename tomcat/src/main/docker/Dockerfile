@@ -28,5 +28,7 @@ RUN mkdir -p $CATALINA_BASE/webapps \
 # TODO (cassand): This configuration might come from a different module in the project (tomcat-base)
     && cp -R $CATALINA_HOME/conf/* $CATALINA_BASE/conf
 
+WORKDIR $CATALINA_BASE/webapps
+
 EXPOSE 8080
 CMD ["/bin/bash", "${tomcat.home}/bin/catalina.sh", "run"]
