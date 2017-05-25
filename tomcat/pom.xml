@@ -179,6 +179,22 @@
               </resources>
             </configuration>
           </execution>
+          <execution>
+            <id>copy-cloudbuild-configuration</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/cloudbuild</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${basedir}/src/cloudbuild</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
 
