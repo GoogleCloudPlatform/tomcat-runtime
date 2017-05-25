@@ -1,0 +1,11 @@
+# Cloud Builder pipeline for running integration tests
+# https://cloud.google.com/container-builder/docs/overview
+steps:
+  # Runtimes-common integration tests
+  # See https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests
+  - name: 'gcr.io/gcp-runtimes/integration_test:2017-03-23-134436'
+    args:
+      - '--no-deploy'
+      - '--url=${_DEPLOYED_APP_URL}'
+      - '--skip-logging-tests'
+      - '--skip-monitoring-tests'
