@@ -29,6 +29,10 @@
   <name>Tomcat-Runtime :: Tests :: Simple Tests</name>
   <packaging>war</packaging>
 
+  <properties>
+   <test.docker.image>${docker.image.name}:${docker.tag.long}</test.docker.image>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
