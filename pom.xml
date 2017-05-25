@@ -33,14 +33,18 @@
     <tomcat.major.version>8</tomcat.major.version>
     <tomcat.minor.version>5</tomcat.minor.version>
     <tomcat.dot.version>15</tomcat.dot.version>
-    <tomcat.version>${tomcat.major.version}.${tomcat.minor.version}.${tomcat.dot.version}</tomcat.version>
+    <tomcat.version>${tomcat.major.version}.${tomcat.minor.version}.${tomcat.dot.version}
+    </tomcat.version>
     <docker.tag.short>${tomcat.major.version}</docker.tag.short>
-    <docker.tag.long>${tomcat.major.version}.${tomcat.minor.version}-${maven.build.timestamp}</docker.tag.long>
+    <docker.tag.long>${tomcat.major.version}.${tomcat.minor.version}-${maven.build.timestamp}
+    </docker.tag.long>
+    <docker.image.name>tomcat</docker.image.name>
     <docker.openjdk.image>gcr.io/google-appengine/openjdk:8-2017-05-22_14_38</docker.openjdk.image>
   </properties>
 
   <modules>
     <module>tomcat</module>
+    <module>tests/test-war-simple</module>
   </modules>
 
   <build>
@@ -72,7 +76,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-dependency-plugin</artifactId>
-          <version>2.10</version>
+          <version>3.0.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -82,16 +86,16 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.5.1</version>
+          <version>3.6.1</version>
           <configuration>
             <source>1.8</source>
             <target>1.8</target>
           </configuration>
         </plugin>
         <plugin>
-          <groupId>com.spotify</groupId>
+          <groupId>io.fabric8</groupId>
           <artifactId>docker-maven-plugin</artifactId>
-          <version>0.4.13</version>
+          <version>0.21.0</version>
         </plugin>
       </plugins>
     </pluginManagement>

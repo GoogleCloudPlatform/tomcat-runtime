@@ -29,6 +29,7 @@
 
   <properties>
     <tomcat.home>/usr/local/tomcat</tomcat.home>
+    <tomcat.base>/var/lib/tomcat</tomcat.base>
   </properties>
 
   <profiles>
@@ -40,7 +41,7 @@
       <build>
         <plugins>
           <plugin>
-            <groupId>com.spotify</groupId>
+            <groupId>io.fabric8</groupId>
             <artifactId>docker-maven-plugin</artifactId>
             <executions>
               <execution>
@@ -50,13 +51,18 @@
                   <goal>build</goal>
                 </goals>
                 <configuration>
-                  <imageName>tomcat</imageName>
-                  <imageTags>
-                    <imageTag>${docker.tag.short}</imageTag>
-                    <imageTag>${docker.tag.long}</imageTag>
-                  </imageTags>
-                  <dockerDirectory>${project.build.directory}/docker</dockerDirectory>
-                  <pullOnBuild>true</pullOnBuild>
+                 <images>
+                   <image>
+                     <name>${docker.image.name}</name>
+                     <build>
+                       <dockerFileDir>${project.build.directory}/docker-src</dockerFileDir>
+                       <tags>
+                         <tag>${docker.tag.short}</tag>
+                         <tag>${docker.tag.long}</tag>
+                       </tags>
+                     </build>
+                   </image>
+                 </images>
                 </configuration>
               </execution>
             </executions>
@@ -105,7 +111,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/docker</outputDirectory>
+              <outputDirectory>${project.build.directory}/docker-src</outputDirectory>
               <resources>
                 <resource>
                   <directory>${basedir}/src/main/docker</directory>
@@ -121,7 +127,7 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/docker/tomcat-home</outputDirectory>
+              <outputDirectory>${project.build.directory}/docker-src/tomcat-home</outputDirectory>
               <resources>
                 <resource>
                   <directory>${project.build.directory}/apache-tomcat-${tomcat.version}</directory>
