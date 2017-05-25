@@ -1,5 +1,13 @@
 schemaVersion: 1.0.0
 
+commandTests:
+- name: 'CATALINA_HOME is set'
+  command: ['env']
+  expectedOutput: ['CATALINA_HOME=${tomcat.home}']
+- name: 'CATALINA_BASE is set'
+  command: ['env']
+  expectedOutput: ['CATALINA_BASE=${tomcat.base}']
+
 fileExistenceTests:
 - name: 'Tomcat home exists'
   path: '${tomcat.home}'
