@@ -17,6 +17,7 @@ fileExistenceTests:
   path: '${tomcat.home}/bin/catalina.sh'
   isDirectory: false
   shouldExist: true
+  permissions: '-rwxr-x--x'
 - name: 'Tomcat base exists'
   path: '${tomcat.base}'
   isDirectory: true
