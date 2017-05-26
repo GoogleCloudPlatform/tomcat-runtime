@@ -7,6 +7,9 @@ commandTests:
 - name: 'CATALINA_BASE is set'
   command: ['env']
   expectedOutput: ['CATALINA_BASE=${tomcat.base}']
+- name: 'Catalina script is executable'
+  command: ['find', '${tomcat.home}/bin/catalina.sh', '-executable']
+  expectedOutput: ['catalina.sh']
 
 fileExistenceTests:
 - name: 'Tomcat home exists'
@@ -17,7 +20,6 @@ fileExistenceTests:
   path: '${tomcat.home}/bin/catalina.sh'
   isDirectory: false
   shouldExist: true
-  permissions: '-rwxr-x--x'
 - name: 'Tomcat base exists'
   path: '${tomcat.base}'
   isDirectory: true
