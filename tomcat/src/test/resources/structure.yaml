@@ -1,0 +1,46 @@
+schemaVersion: 1.0.0
+
+commandTests:
+- name: 'CATALINA_HOME is set'
+  command: ['env']
+  expectedOutput: ['CATALINA_HOME=${tomcat.home}']
+- name: 'CATALINA_BASE is set'
+  command: ['env']
+  expectedOutput: ['CATALINA_BASE=${tomcat.base}']
+- name: 'Catalina script is executable'
+  command: ['find', '${tomcat.home}/bin/catalina.sh', '-executable']
+  expectedOutput: ['catalina.sh']
+
+fileExistenceTests:
+- name: 'Tomcat home exists'
+  path: '${tomcat.home}'
+  isDirectory: true
+  shouldExist: true
+- name: 'Catalina script exists'
+  path: '${tomcat.home}/bin/catalina.sh'
+  isDirectory: false
+  shouldExist: true
+- name: 'Tomcat base exists'
+  path: '${tomcat.base}'
+  isDirectory: true
+  shouldExist: true
+- name: 'Webapps directory exists'
+  path: '${tomcat.base}/webapps'
+  isDirectory: true
+  shouldExist: true
+- name: 'Catalina temp directory exists'
+  path: '${tomcat.base}/temp'
+  isDirectory: true
+  shouldExist: true
+- name: 'Server configuration file exists in Catalina base'
+  path: '${tomcat.base}/conf/server.xml'
+  isDirectory: false
+  shouldExist: true
+- name: 'Catalina configuration file exists'
+  path: '${tomcat.base}/conf/catalina.properties'
+  isDirectory: false
+  shouldExist: true
+
+licenseTests:
+- debian: true
+  files: []
