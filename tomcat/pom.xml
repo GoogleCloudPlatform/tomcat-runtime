@@ -79,7 +79,7 @@
                   <goal>exec</goal>
                 </goals>
                 <configuration>
-                  <executable>../../scripts/structure_test.sh</executable>
+                  <executable>../../scripts/utils/structure_test.sh</executable>
                   <workingDirectory>${project.build.directory}</workingDirectory>
                   <arguments>
                     <argument>--image</argument>
