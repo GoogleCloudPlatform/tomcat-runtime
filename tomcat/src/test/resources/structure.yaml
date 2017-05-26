@@ -26,6 +26,18 @@ fileExistenceTests:
   path: '${tomcat.base}/webapps'
   isDirectory: true
   shouldExist: true
+- name: 'Catalina temp directory exists'
+  path: '${tomcat.base}/temp'
+  isDirectory: true
+  shouldExist: true
+- name: 'Server configuration file exists in Catalina base'
+  path: '${tomcat.base}/conf/server.xml'
+  isDirectory: false
+  shouldExist: true
+- name: 'Catalina configuration file exists'
+  path: '${tomcat.base}/conf/catalina.properties'
+  isDirectory: false
+  shouldExist: true
 
 licenseTests:
 - debian: true
