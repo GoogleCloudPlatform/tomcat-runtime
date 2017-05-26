@@ -1,8 +1,0 @@
-steps:
-  name: gcr.io/gcp-runtimes/structure_test
-  args: [
-    '--image',
-    'gcr.io/$PROJECT_ID/${docker.image.name}:${docker.tag.long}',
-    '-v',
-    '--config',
-    '/workspace/tomcat/target/test-classes/structure.yaml']
