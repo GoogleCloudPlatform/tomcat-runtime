@@ -21,8 +21,11 @@
 <Server port="-1">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <!-- The security listener enforce the user to be non root.
-       This is not usable yet due to the structure tests and
-       the access to the war file witch need root privilege. This might be implemented using jsvc.
+       This is not usable yet due to :
+        * The structure tests fail if the default user is not root
+        * The war file belong to the root user and can't be read by tomcat user
+
+        The jsvc service might be used to change the user at runtime
   <Listener className="org.apache.catalina.security.SecurityListener" />
   -->
   <!--APR library loader. Documentation at /docs/apr.html -->
@@ -31,7 +34,6 @@
   <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
   <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
   <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
-
 
   <Service name="Catalina">
 

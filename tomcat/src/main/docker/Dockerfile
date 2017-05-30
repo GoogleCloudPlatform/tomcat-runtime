@@ -30,9 +30,8 @@ ENV CATALINA_BASE ${tomcat.base}
 COPY tomcat-base $CATALINA_BASE
 RUN mkdir -p $CATALINA_BASE/webapps \
     && mkdir -p $CATALINA_BASE/temp \
-    && chown -R tomcat:tomcat ${CATALINA_BASE}
-
-
+    && chown -R tomcat:tomcat ${CATALINA_BASE} \
+    && chmod -R 400 $CATALINA_BASE/conf
 
 WORKDIR $CATALINA_BASE/webapps
 EXPOSE 8080
