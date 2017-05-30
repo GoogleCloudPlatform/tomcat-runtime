@@ -13,3 +13,9 @@
 # limitations under the License.
 FROM ${test.docker.image}
 ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
+
+# The login to tomcat may be done into the tomcat image however:
+# * The structure tests fail if the default user is not root
+# * The war file belong to the root user and can't be read by tomcat user
+RUN chown tomcat:tomcat $CATALINA_BASE/webapps/ROOT.war
+USER tomcat

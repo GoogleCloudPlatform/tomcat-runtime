@@ -20,7 +20,9 @@
 -->
 <Server port="-1">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
-  <!-- Security listener. Documentation at /docs/config/listeners.html
+  <!-- The security listener enforce the user to be non root.
+       This is not usable yet due to the structure tests and
+       the access to the war file witch need root privilege. This might be implemented using jsvc.
   <Listener className="org.apache.catalina.security.SecurityListener" />
   -->
   <!--APR library loader. Documentation at /docs/apr.html -->
@@ -38,8 +40,7 @@
 
     <Connector port="8080" protocol="HTTP/1.1"
                executor="tomcatThreadPool"
-               connectionTimeout="20000"
-               redirectPort="8443" />
+               connectionTimeout="20000" />
 
     <Engine name="Catalina" defaultHost="localhost">
 
