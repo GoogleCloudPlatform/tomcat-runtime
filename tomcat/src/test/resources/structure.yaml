@@ -36,10 +36,6 @@ fileExistenceTests:
   path: '${tomcat.base}/conf/server.xml'
   isDirectory: false
   shouldExist: true
-- name: 'Catalina configuration file exists'
-  path: '${tomcat.base}/conf/catalina.properties'
-  isDirectory: false
-  shouldExist: true
 
 licenseTests:
 - debian: true
