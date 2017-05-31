@@ -10,7 +10,7 @@ This image does not have official release, so you will need to build it first.
 Make sure you have docker and maven installed and that the docker daemon is running 
 and run the following command:
 ```bash
-mcn clean install
+mvn clean install
 ```
 
 This will add the tomcat runtime image to your local docker repository. You can now use the 
@@ -22,6 +22,16 @@ you will need to create a Dockerfile based on the current image and add your app
 ```dockerfile
 FROM gcr.io/your-repository/tomcat
 COPY your-application.war ROOT.war
+```
+
+# Securing your application
+For security purpose it is recommend to start the tomcat instance using the tomcat user. 
+
+You can do so by adding the following line at the end of your Dockerfile.
+
+```dockerfile
+RUN chown tomcat:tomcat $CATALINA_BASE/webapps/ROOT.war
+USER tomcat
 ```
 
 ## Contributing changes
