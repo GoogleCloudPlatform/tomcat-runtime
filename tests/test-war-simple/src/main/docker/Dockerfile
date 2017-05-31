@@ -13,3 +13,7 @@
 # limitations under the License.
 FROM ${test.docker.image}
 ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
+
+# For more security the tomcat instance can be started by the tomcat user
+# RUN chown tomcat:tomcat $CATALINA_BASE/webapps/ROOT.war
+# USER tomcat

@@ -164,6 +164,25 @@
             </configuration>
           </execution>
           <execution>
+            <id>copy-tomcat-base</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/docker-src/tomcat-base</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/tomcat-base</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
             <id>copy-structure-test</id>
             <phase>generate-test-resources</phase>
             <goals>
