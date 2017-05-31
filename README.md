@@ -4,6 +4,26 @@
 
 This repository contains the source for the Google-maintained Tomcat [docker](https://docker.com) image.
 
+# Building the image
+This image does not have official release, so you will need to build it first.
+
+Make sure you have docker and maven installed and that the docker daemon is running 
+and run the following command:
+```bash
+mcn clean install
+```
+
+This will add the tomcat runtime image to your local docker repository. You can now use the 
+newly created image as a base in your Dockerfile.
+
+# Using the Tomcat image
+you will need to create a Dockerfile based on the current image and add your application as a war file.
+
+```dockerfile
+FROM gcr.io/your-repository/tomcat
+COPY your-application.war ROOT.war
+```
+
 ## Contributing changes
 
 * See [CONTRIBUTING.md](CONTRIBUTING.md)
