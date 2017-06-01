@@ -17,7 +17,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<Server port="8005" shutdown="SHUTDOWN">
+<Server port="-1">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <!-- The security listener enforce the user to be non root.
        This is not usable yet due to :
