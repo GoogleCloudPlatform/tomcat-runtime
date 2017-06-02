@@ -16,6 +16,20 @@ FROM gcr.io/your-repository/tomcat
 COPY your-application.war ROOT.war
 ```
 
+# Security best practices
+
+## Execute tomcat with a non root user
+For security purpose it is recommend to start the tomcat instance using the tomcat user. 
+
+You can do so by adding the following line at the end of your Dockerfile.
+
+```dockerfile
+FROM gcr.io/your-repository/tomcat
+COPY your-application.war ROOT.war
+
+RUN chown tomcat:tomcat $CATALINA_BASE/webapps/ROOT.war
+USER tomcat
+```
 ## Contributing changes
 
 * See [CONTRIBUTING.md](CONTRIBUTING.md)
