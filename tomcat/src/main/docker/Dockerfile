@@ -13,18 +13,24 @@
 # limitations under the License.
 FROM ${docker.openjdk.image}
 
+RUN groupadd -r tomcat \
+ && useradd -r -g tomcat tomcat
+
 # Environment variable for tomcat
 ENV CATALINA_HOME ${tomcat.home}
 
 # Create Tomcat home
 COPY tomcat-home $CATALINA_HOME
-RUN chmod +x ${CATALINA_HOME}/bin/catalina.sh
+RUN chmod +x ${CATALINA_HOME}/bin/catalina.sh \
+    && chown -R tomcat:tomcat ${CATALINA_HOME}
 
 # Create Tomcat base
 ENV CATALINA_BASE ${tomcat.base}
 COPY tomcat-base $CATALINA_BASE
 RUN mkdir -p $CATALINA_BASE/webapps \
     && mkdir -p $CATALINA_BASE/temp \
+    && chown -R tomcat:tomcat ${CATALINA_BASE} \
+    && chmod -R 400 $CATALINA_BASE/conf
 
 WORKDIR $CATALINA_BASE/webapps
 
