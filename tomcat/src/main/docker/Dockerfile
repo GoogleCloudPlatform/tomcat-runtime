@@ -14,7 +14,7 @@
 FROM ${docker.openjdk.image}
 
 RUN groupadd -r tomcat \
- && useradd -r -g tomcat tomcat
+    && useradd -r -g tomcat tomcat
 
 # Environment variable for tomcat
 ENV CATALINA_HOME ${tomcat.home}
@@ -29,6 +29,7 @@ ENV CATALINA_BASE ${tomcat.base}
 COPY tomcat-base $CATALINA_BASE
 RUN mkdir -p $CATALINA_BASE/webapps \
     && mkdir -p $CATALINA_BASE/temp \
+    && cp $CATALINA_HOME/conf/web.xml $CATALINA_BASE/conf/web.xml \
     && chown -R tomcat:tomcat ${CATALINA_BASE} \
     && chmod -R 400 $CATALINA_BASE/conf
 
