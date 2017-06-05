@@ -20,11 +20,8 @@ Specification: [Runtime common - Structure tests](https://github.com/GoogleCloud
 
 These tests inspect the content of the Docker image to ensure the presence of specific files and environment variables.
 
-They are automatically run when the image is built with Maven. You can also launch them with the command:
-
-```bash
-mvn clean verify
-```
+They are automatically run when the image is built with Maven. 
+You can find the details of the tests in [structure.yaml](tomcat/src/test/resources/structure.yaml)
 
 ### Integration tests
 
@@ -34,8 +31,8 @@ The integration tests will deploy a sample application to App Engine Flex and ru
 that the standard requirements of the [language runtime image](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests#tests) are respected.
 
 Before running these tests ensure that:
-* Maven is installed
-* Google Cloud SDK is installed
+* [Maven](https://maven.apache.org/download.cgi) is installed
+* [Google Cloud SDK](https://cloud.google.com/sdk) is installed
 
 A script is available to run those tests:
 ```bash
