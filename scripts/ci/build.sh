@@ -23,16 +23,16 @@ if [ -n "$GCLOUD_FILE" ]; then
 fi
 
 if [ -n "$DOCKER_NAMESPACE" ]; then
-  projectName="$DOCKER_NAMESPACE"
+  PROJECT_NAMESPACE="$DOCKER_NAMESPACE"
 else
-  projectName="gcr.io/$(gcloud info \
+  PROJECT_NAMESPACE="gcr.io/$(gcloud info \
                 | awk '/^Project: / { print $2 }' \
                 | sed 's/\[//'  \
                 | sed 's/\]//')"
 fi
 
 readonly TAG=$(git rev-parse --short HEAD)
-readonly IMAGE="${projectName}/tomcat:${TAG}"
+readonly IMAGE="${PROJECT_NAMESPACE}/tomcat:${TAG}"
 
 echo "Building $IMAGE and running structure tests"
 gcloud container builds submit \
