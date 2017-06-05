@@ -34,8 +34,8 @@ Before running these tests ensure that:
 * [Maven](https://maven.apache.org/download.cgi) is installed
 * [Google Cloud SDK](https://cloud.google.com/sdk) is installed
 
-When running those tests you need to indicate which image need to be tested. 
-As the tests will be executed remotely the image need to be pushed in a gcr.io repository.
+When running those tests you need to indicate which image needs to be tested.
+As the tests will be executed remotely, the image needs to be pushed to a gcr.io repository.
  
 A script is available to run those tests:
 ```bash
