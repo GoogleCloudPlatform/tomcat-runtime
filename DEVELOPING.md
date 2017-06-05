@@ -2,14 +2,14 @@
 
 ## Building the image
 
-Make sure you have docker and maven installed and that the docker daemon is running 
-and run the following command:
+Make sure you have Docker and Maven installed and that the Docker daemon is running.
+Then run the following command:
 
 ```bash
 mvn clean install
 ```
 
-This will add the tomcat runtime image to your local docker repository. You can now use the 
+This will add the Tomcat runtime image to your local docker repository. You can now use the
 newly created image as a base in your Dockerfile.
 
 ## Testing the image
@@ -18,9 +18,9 @@ newly created image as a base in your Dockerfile.
 
 Specification: [Runtime common - Structure tests](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/structure_tests)
 
-This tests inspect the content of the image to ensure the presence of specific files and environment variables. 
+These tests inspect the content of the Docker image to ensure the presence of specific files and environment variables.
 
-Those tests are automatically run when the image is build with maven. You can launch them with the command:
+They are automatically run when the image is built with Maven. You can also launch them with the command:
 
 ```bash
 mvn clean verify
@@ -30,10 +30,10 @@ mvn clean verify
 
 Specification: [Runtimes common - Integration tests](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests)
 
-The integration tests will deploy a sample application to App Engine and run remote test against this application to ensure
-that the standard requirement of [language runtime image](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests#tests) are respected.
+The integration tests will deploy a sample application to App Engine Flex and run remote tests against this application to ensure
+that the standard requirements of the [language runtime image](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests#tests) are respected.
 
-Before running this tests ensure that:
+Before running these tests ensure that:
 * Maven is installed
 * Google Cloud SDK is installed
 
