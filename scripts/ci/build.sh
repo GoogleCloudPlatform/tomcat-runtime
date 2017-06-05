@@ -31,7 +31,11 @@ else
                 | sed 's/\]//')"
 fi
 
-readonly TAG=$(git rev-parse --short HEAD)
+TAG=$(git rev-parse --short HEAD)
+if [ -z "${TAG}" ]; then
+  TAG="$(date -u +%Y-%m-%d_%H_%M)"
+fi
+
 readonly IMAGE="${PROJECT_NAMESPACE}/tomcat:${TAG}"
 
 echo "Building $IMAGE and running structure tests"
