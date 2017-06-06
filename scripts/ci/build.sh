@@ -20,6 +20,7 @@ readonly projectRoot=$dir/../..
 
 if [ -n "$GCLOUD_FILE" ]; then
   source $dir/gcloud-init.sh
+  cd github/tomcat-runtime
 fi
 
 if [ -n "$DOCKER_NAMESPACE" ]; then
