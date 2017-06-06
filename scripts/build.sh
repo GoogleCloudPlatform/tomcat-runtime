@@ -14,11 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#
+# All the arguments passed to this script are transferred to the maven command
+#
+
 dir=$(dirname $0)
 projectRoot=${dir}/..
 
+if [ -z "$DOCKER_NAMESPACE" ]; then
+  set -- $@ "-Ddocker.project.namespace=$DOCKER_NAMESPACE"
+fi
+
 pushd $projectRoot
-mvn -P-local-docker-build -P-test.local $@ clean install
+mvn -P-local-docker-build -P-test.local "$@" clean install
 popd
 
 gcloud container builds submit --config $projectRoot/tomcat/target/cloudbuild/build.yaml $projectRoot

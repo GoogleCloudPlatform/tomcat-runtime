@@ -14,15 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This script is intended to be used to create a release of the Tomcat runtime
+# Currently the process is the same as a build but additional procedure may be added here
 dir=$(dirname $0)
 projectRoot=${dir}/../..
 
-if [ -z "$DOCKER_NAMESPACE" ]; then
-  DOCKER_NAMESPACE="gcr.io/$(gcloud info \
-                | awk '/^Project: / { print $2 }' \
-                | sed 's/\[//'  \
-                | sed 's/\]//')"
-fi
-
-${projectRoot}/scripts/build.sh \
-  -Ddocker.project.namespace=${DOCKER_NAMESPACE}
+${projectRoot}/scripts/build.sh
