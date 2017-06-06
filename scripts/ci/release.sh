@@ -15,10 +15,14 @@
 # limitations under the License.
 
 dir=$(dirname $0)
-projectRoot=${dir}/..
+projectRoot=${dir}/../..
 
-pushd $projectRoot
-mvn -P-local-docker-build -P-test.local $@ clean install
-popd
+if [ -z "$DOCKER_NAMESPACE" ]; then
+  DOCKER_NAMESPACE="gcr.io/$(gcloud info \
+                | awk '/^Project: / { print $2 }' \
+                | sed 's/\[//'  \
+                | sed 's/\]//')"
+fi
 
-gcloud container builds submit --config $projectRoot/tomcat/target/cloudbuild/build.yaml $projectRoot
+${projectRoot}/scripts/build.sh \
+  -Ddocker.project.namespace=${DOCKER_NAMESPACE}
