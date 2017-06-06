@@ -20,7 +20,6 @@ readonly projectRoot=$dir/../..
 
 if [ -n "$GCLOUD_FILE" ]; then
   source $dir/gcloud-init.sh
-  cd github/tomcat-runtime
 fi
 
 if [ -n "$DOCKER_NAMESPACE" ]; then
@@ -32,10 +31,9 @@ else
                 | sed 's/\]//')"
 fi
 
-TAG=$(git rev-parse --short HEAD)
-if [ -z "${TAG}" ]; then
-  TAG="$(date -u +%Y-%m-%d_%H_%M)"
-fi
+pushd $projectRoot
+  TAG=$(git rev-parse --short HEAD)
+popd
 
 readonly IMAGE="${PROJECT_NAMESPACE}/tomcat:${TAG}"
 
