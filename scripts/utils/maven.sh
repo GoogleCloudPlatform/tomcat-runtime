@@ -14,17 +14,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#
-# All the arguments passed to this script are transferred to the maven command
-#
+function maven_utils::execute () {
+  if [ -n "$DOCKER_NAMESPACE" ]; then
+    set -- $@ "-Ddocker.project.namespace=$DOCKER_NAMESPACE"
+  fi
 
-dir=$(dirname $0)
-projectRoot=${dir}/..
+  if [ -n "$DOCKER_TAG_LONG" ]; then
+    set -- $@ "-Ddocker.tag.long=$DOCKER_TAG_LONG"
+  fi
 
-source ${projectRoot}/scripts/utils/maven.sh
+  mvn -P-local-docker-build -P-test.local "$@"
+}
 
-pushd ${projectRoot}
-  maven_utils::execute $@ clean install
-popd
-
-gcloud container builds submit --config ${projectRoot}/tomcat/target/cloudbuild/build.yaml ${projectRoot}
+function maven_utils::get_property () {
+  echo $(maven_utils::execute org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
+          --non-recursive -q \
+          -Dexec.executable="echo" \
+          -Dexec.args="\${$1}" )
+}
