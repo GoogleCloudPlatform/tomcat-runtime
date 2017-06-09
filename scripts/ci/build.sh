@@ -21,16 +21,6 @@ readonly projectRoot=$dir/../..
 # Load the library with Maven utilities
 source ${projectRoot}/scripts/utils/maven.sh
 
-# If we are in a gcloud environment we want to initialize the gcloud CLI
-if [ -n "$GCLOUD_FILE" ]; then
-  source ${dir}/gcloud-init.sh
-fi
-
-# Generate the Docker image tag from the git tag
-pushd ${projectRoot}
-  export DOCKER_TAG_LONG=$(git rev-parse --short HEAD)
-popd
-
 # If no namespace is specified deduct it from the gcloud CLI
 if [ -z "$DOCKER_NAMESPACE" ]; then
   export DOCKER_NAMESPACE="gcr.io/$(gcloud info \
@@ -39,7 +29,16 @@ if [ -z "$DOCKER_NAMESPACE" ]; then
                 | sed 's/\]//')"
 fi
 
-readonly IMAGE=$(maven_utils::get_property cloudbuild.tomcat.image)
+# If we are in a gcloud environment we want to initialize the gcloud CLI
+if [ -n "$GCLOUD_FILE" ]; then
+  source ${dir}/gcloud-init.sh
+fi
+
+# Generate the Docker image tag from the git tag and generate the complete image name
+pushd ${projectRoot}
+  export DOCKER_TAG_LONG=$(git rev-parse --short HEAD)
+  readonly IMAGE=$(maven_utils::get_property cloudbuild.tomcat.image)
+popd
 
 echo "Building $IMAGE and running structure tests"
 ${projectRoot}/scripts/build.sh
