@@ -14,6 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Execute an arbitrary maven command
+# Arguments:
+#   - All the arguments are passed to the maven command (Example: clean install)
+#
 function maven_utils::execute () {
   if [ -n "$DOCKER_NAMESPACE" ]; then
     set -- $@ "-Ddocker.project.namespace=$DOCKER_NAMESPACE"
@@ -26,6 +30,10 @@ function maven_utils::execute () {
   mvn -P-local-docker-build -P-test.local "$@"
 }
 
+# Return a maven property
+# Arguments:
+#  - The name of the property (Example: docker.tag.long)
+#
 function maven_utils::get_property () {
   echo $(maven_utils::execute org.codehaus.mojo:exec-maven-plugin:1.6.0:exec \
           --non-recursive -q \
