@@ -24,7 +24,7 @@ projectRoot=${dir}/..
 source ${projectRoot}/scripts/utils/maven.sh
 
 pushd ${projectRoot}
-  maven_utils::execute $@ clean install
+  maven_utils::execute clean install
 popd
 
 gcloud container builds submit --config ${projectRoot}/tomcat/target/cloudbuild/build.yaml ${projectRoot}
