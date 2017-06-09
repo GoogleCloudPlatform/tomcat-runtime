@@ -5,10 +5,10 @@ steps:
 - name: 'gcr.io/gcp-runtimes/structure_test'
   args: [
     '--image',
-    '${docker.project.namespace}/${docker.image.name}:${docker.tag.long}',
+    '${cloudbuild.tomcat.image}',
     '-v',
     '--config',
     '/workspace/tomcat/target/test-classes/structure.yaml']
 
 images:
-- '${docker.project.namespace}/${docker.image.name}:${docker.tag.long}'
+- '${cloudbuild.tomcat.image}'

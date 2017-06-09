@@ -21,12 +21,10 @@
 dir=$(dirname $0)
 projectRoot=${dir}/..
 
-if [ -z "$DOCKER_NAMESPACE" ]; then
-  set -- $@ "-Ddocker.project.namespace=$DOCKER_NAMESPACE"
-fi
+source ${projectRoot}/scripts/utils/maven.sh
 
-pushd $projectRoot
-mvn -P-local-docker-build -P-test.local "$@" clean install
+pushd ${projectRoot}
+  maven_utils::execute clean install
 popd
 
-gcloud container builds submit --config $projectRoot/tomcat/target/cloudbuild/build.yaml $projectRoot
+gcloud container builds submit --config ${projectRoot}/tomcat/target/cloudbuild/build.yaml ${projectRoot}

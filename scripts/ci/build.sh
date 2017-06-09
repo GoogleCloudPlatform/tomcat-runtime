@@ -18,30 +18,31 @@ set -e
 readonly dir=$(dirname $0)
 readonly projectRoot=$dir/../..
 
+# Load the library with Maven utilities
+source ${projectRoot}/scripts/utils/maven.sh
+
+# If we are in a gcloud environment we want to initialize the gcloud CLI
 if [ -n "$GCLOUD_FILE" ]; then
-  source $dir/gcloud-init.sh
+  source ${dir}/gcloud-init.sh
 fi
 
-if [ -n "$DOCKER_NAMESPACE" ]; then
-  PROJECT_NAMESPACE="$DOCKER_NAMESPACE"
-else
-  PROJECT_NAMESPACE="gcr.io/$(gcloud info \
+# Generate the Docker image tag from the git tag
+pushd ${projectRoot}
+  export DOCKER_TAG_LONG=$(git rev-parse --short HEAD)
+popd
+
+# If no namespace is specified deduct it from the gcloud CLI
+if [ -z "$DOCKER_NAMESPACE" ]; then
+  export DOCKER_NAMESPACE="gcr.io/$(gcloud info \
                 | awk '/^Project: / { print $2 }' \
                 | sed 's/\[//'  \
                 | sed 's/\]//')"
 fi
 
-pushd $projectRoot
-  TAG=$(git rev-parse --short HEAD)
-popd
-
-readonly IMAGE="${PROJECT_NAMESPACE}/tomcat:${TAG}"
+readonly IMAGE=$(maven_utils::get_property cloudbuild.tomcat.image)
 
 echo "Building $IMAGE and running structure tests"
-gcloud container builds submit \
-  --config ${dir}/cloudbuild.yaml \
-  --substitutions="_IMAGE=$IMAGE,_DOCKER_TAG=$TAG" \
-  ${projectRoot}
+${projectRoot}/scripts/build.sh
 
 echo "Running integration tests on $IMAGE"
-$dir/../integration_test.sh ${IMAGE}
+${projectRoot}/scripts/integration_test.sh ${IMAGE}
