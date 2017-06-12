@@ -6,11 +6,20 @@ This repository contains the source for the Google-maintained Tomcat [docker](ht
 
 # Using the Tomcat image
 
-You just have to create a Dockerfile based on the current image and add your application as a war file.
+Create a `Dockerfile` based on the image and add your application WAR as `ROOT.war` to the current working directory.
 
 ```dockerfile
 FROM gcr.io/google-appengine/tomcat
 COPY your-application.war ROOT.war
+```
+
+## Running on App Engine Flexible
+
+Create a `Dockerfile` as described above and specify custom runtime in `app.yaml`.
+
+```yaml
+runtime: custom
+env: flex
 ```
 
 # Security best practices
