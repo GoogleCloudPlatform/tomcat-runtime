@@ -14,25 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dir=$(dirname $0)
-projectRoot=${dir}/../..
-
-source ${projectRoot}/scripts/utils/gcloud.sh
-
-RUNTIME_NAME='tomcat'
-RUNTIME_VERSION='8.5'
-
-if [ -z "${DOCKER_TAG}" ]; then
-  DOCKER_TAG="${RUNTIME_VERSION}-$(date -u +%Y-%m-%d_%H_%M)"
-fi
-
-if [ -z "$DOCKER_NAMESPACE" ]; then
-  DOCKER_NAMESPACE="gcr.io/$(gcloud_utils::get_project_name)"
-fi
-
-IMAGE="${DOCKER_NAMESPACE}/${RUNTIME_NAME}:${DOCKER_TAG}"
-
-gcloud container builds submit \
-        --config ${dir}/release-cloudbuild.yaml \
-        --substitutions="_IMAGE=$IMAGE,_DOCKER_TAG=$DOCKER_TAG" \
-        ${projectRoot}
+function gcloud_utils::get_project_name () {
+  echo $(gcloud info \
+                | awk '/^Project: / { print $2 }' \
+                | sed 's/\[//'  \
+                | sed 's/\]//')
+}

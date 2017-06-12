@@ -20,13 +20,11 @@ readonly projectRoot=$dir/../..
 
 # Load the library with Maven utilities
 source ${projectRoot}/scripts/utils/maven.sh
+source ${projectRoot}/scripts/utils/gcloud.sh
 
 # If no namespace is specified deduct it from the gcloud CLI
 if [ -z "$DOCKER_NAMESPACE" ]; then
-  export DOCKER_NAMESPACE="gcr.io/$(gcloud info \
-                | awk '/^Project: / { print $2 }' \
-                | sed 's/\[//'  \
-                | sed 's/\]//')"
+  export DOCKER_NAMESPACE="gcr.io/$(gcloud_utils::get_project_name)"
 fi
 
 # If we are in a gcloud environment we want to initialize the gcloud CLI
