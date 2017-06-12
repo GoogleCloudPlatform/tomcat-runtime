@@ -18,35 +18,36 @@ set -e
 
 # Runs integration tests on a given runtime image
 
-dir=`dirname $0`
-projectRoot=$dir/..
-testAppDir=$projectRoot/tests/test-war-integration
-deployDir=$testAppDir/target/docker-src
+readonly dir=$(dirname $0)
+readonly projectRoot=${dir}/..
+readonly testAppDir=${projectRoot}/tests/test-war-integration
+readonly deployDir=${testAppDir}/target/docker-src
+readonly service="tomcat-runtime-integration"
 
-imageUnderTest=$1
+readonly imageUnderTest=$1
 if [ -z "${imageUnderTest}" ]; then
   echo "Usage: ${0} <image_under_test>"
   exit 1
 fi
 
 # build the test app
-pushd $testAppDir
-mvn -B clean install
+pushd ${testAppDir}
+  mvn -B clean install
 popd
 
 # deploy to app engine
 pushd $deployDir
-export STAGING_IMAGE=$imageUnderTest
-envsubst '$STAGING_IMAGE' < Dockerfile.in > Dockerfile
-echo "Deploying to App Engine..."
-gcloud app deploy -q
+  export STAGING_IMAGE=$imageUnderTest
+  envsubst '$STAGING_IMAGE' < Dockerfile.in > Dockerfile
+  echo "Deploying to App Engine..."
+  gcloud app deploy -q
 popd
 
-DEPLOYED_APP_URL="http://$(gcloud app describe | grep defaultHostname | awk '{print $2}')"
+readonly DEPLOYED_APP_URL="http://${service}-dot-$(gcloud app describe | grep defaultHostname | awk '{print $2}')"
 echo "Running integration tests on application that is deployed at $DEPLOYED_APP_URL"
 
 # run in cloud container builder
 gcloud container builds submit \
   --config $testAppDir/target/cloudbuild/integration.yaml \
   --substitutions "_DEPLOYED_APP_URL=$DEPLOYED_APP_URL" \
-  $dir
+  ${dir}
