@@ -1,0 +1,21 @@
+steps:
+# Perform maven build, omitting local docker operations
+- name: 'gcr.io/cloud-builders/java/mvn:3.5.0-jdk-8'
+  args:
+    - '--batch-mode'
+    - '-P-local-docker-build'
+    - '-P-test.local'
+    - '-Ddocker.tag.long=${_DOCKER_TAG}'
+    - 'clean'
+    - 'install'
+
+# Build the runtime container
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--tag=${_IMAGE}', '--no-cache', 'tomcat/target/docker-src']
+
+# Runtimes-common structure tests
+# See https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/structure_tests
+- name: 'gcr.io/gcp-runtimes/structure_test'
+  args: ['--image', '${_IMAGE}', '-v', '--config', '/workspace/tomcat/target/test-classes/structure.yaml']
+
+images: ['${_IMAGE}']
