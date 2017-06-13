@@ -36,3 +36,6 @@ gcloud container builds submit \
         --config ${dir}/release-cloudbuild.yaml \
         --substitutions="_IMAGE=$IMAGE,_DOCKER_TAG=$DOCKER_TAG" \
         ${projectRoot}
+
+# Allow external script to reference the image tag
+export TAG=${DOCKER_TAG}
