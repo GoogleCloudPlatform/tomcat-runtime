@@ -18,7 +18,7 @@
 # All the arguments passed to this script are transferred to the maven command
 #
 
-dir=$(dirname $0)
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 projectRoot=${dir}/..
 
 source ${projectRoot}/scripts/utils/maven.sh
