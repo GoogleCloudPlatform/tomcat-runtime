@@ -47,7 +47,7 @@ public class SecureServlet extends HttpServlet {
 
     resp.setContentType("plain/text");
 
-    // This test must not be run if we are not behind a load balancer
+    // This test does not need to be run if the request is not forwarded
     if (req.getHeader("x-forwarded-proto") == null || req.getHeader("x-forwarded-proto").equals("http")) {
       resp.getWriter().print("OK - Test not run");
       return;
