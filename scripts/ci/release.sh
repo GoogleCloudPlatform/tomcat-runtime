@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-dir=$(dirname $0)
+dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 projectRoot=${dir}/../..
 
 source ${projectRoot}/scripts/utils/gcloud.sh
