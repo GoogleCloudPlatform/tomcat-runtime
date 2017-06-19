@@ -39,7 +39,7 @@
     <docker.tag.long>${tomcat.major.version}.${tomcat.minor.version}-${maven.build.timestamp}
     </docker.tag.long>
     <docker.image.name>tomcat</docker.image.name>
-    <docker.openjdk.image>gcr.io/google-appengine/openjdk:8-2017-06-05_18_21</docker.openjdk.image>
+    <docker.openjdk.image>gcr.io/google-appengine/openjdk:8-2017-06-15_19_28</docker.openjdk.image>
     <docker.project.namespace>gcr.io/$PROJECT_ID</docker.project.namespace>
     <cloudbuild.tomcat.image>${docker.project.namespace}/${docker.image.name}:${docker.tag.long}</cloudbuild.tomcat.image>
   </properties>
