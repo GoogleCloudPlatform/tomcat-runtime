@@ -17,7 +17,6 @@
 package com.google.cloud.runtimes.tomcat.test.simple;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -39,7 +38,7 @@ import javax.servlet.http.HttpServletResponse;
  *   See tomcat-base/server.xml for the configuration.
  */
 @WebServlet(urlPatterns = "/custom/tests/secure")
-public class SecureServlet extends HttpServlet {
+public class SecureTestServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -47,18 +46,17 @@ public class SecureServlet extends HttpServlet {
 
     resp.setContentType("plain/text");
 
-    // This test does not need to be run if the request is not forwarded
-    if (req.getHeader("x-forwarded-proto") == null || req.getHeader("x-forwarded-proto").equals("http")) {
-      resp.getWriter().print("OK - Test not run");
-      return;
-    }
+    if (req.getHeader("x-forwarded-proto") != null) {
 
-    if (req.isSecure()) {
-      resp.getWriter().print("OK");
-    } else {
-      resp.setStatus(500);
-      PrintWriter writer = resp.getWriter();
-      writer.println("x-forwarded-proto is present but the request is not considered as secure");
+      if (req.getHeader("x-forwarded-proto").equals("http") && req.isSecure()) {
+        resp.setStatus(500);
+        resp.getWriter().println("Error: x-forwarded-proto is set to http and the connection is considered secure");
+      }
+
+      else if (req.getHeader("x-forwarded-proto").equals("https") && !req.isSecure()) {
+        resp.setStatus(500);
+        resp.getWriter().println("Error: x-forwarded-proto is set to https but the connection is not considered secure");
+      }
     }
   }
 }
