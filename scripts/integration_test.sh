@@ -32,7 +32,7 @@ fi
 
 # build the test app
 pushd ${testAppDir}
-  mvn -B clean install
+  mvn -B -P-local-docker-build -P-local.test clean install
 popd
 
 # deploy to app engine
@@ -43,7 +43,7 @@ pushd $deployDir
   gcloud app deploy -q
 popd
 
-readonly DEPLOYED_APP_URL="http://${service}-dot-$(gcloud app describe | grep defaultHostname | awk '{print $2}')"
+readonly DEPLOYED_APP_URL="https://${service}-dot-$(gcloud app describe | grep defaultHostname | awk '{print $2}')"
 echo "Running integration tests on application that is deployed at $DEPLOYED_APP_URL"
 
 # run in cloud container builder

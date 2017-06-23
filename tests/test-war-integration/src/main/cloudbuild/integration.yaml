@@ -3,9 +3,10 @@
 steps:
   # Runtimes-common integration tests
   # See https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests
-  - name: 'gcr.io/gcp-runtimes/integration_test:2017-03-23-134436'
+  - name: 'gcr.io/gcp-runtimes/integration_test:2017-04-28-142058'
     args:
       - '--no-deploy'
       - '--url=${_DEPLOYED_APP_URL}'
-      - '--skip-logging-tests'
+      - '--skip-standard-logging-tests'
+      - '--skip-custom-logging-tests'
       - '--skip-monitoring-tests'
