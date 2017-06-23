@@ -43,6 +43,14 @@ fileExistenceTests:
   path: '${tomcat.base}/conf/server.xml'
   isDirectory: false
   shouldExist: true
+- name: 'Gcp configuration file should exists'
+  path: '/config/gcp.xml'
+  isDirectory: false
+  shouldExist: true
+- name: 'Gcp configuration placeholder should exists'
+  path: '${tomcat.base}/conf/gcp.xml'
+  isDirectory: false
+  shouldExist: true
 
 licenseTests:
 - debian: true
