@@ -192,7 +192,7 @@
               <outputDirectory>${project.build.directory}/docker-src/config</outputDirectory>
               <resources>
                 <resource>
-                  <directory>${project.basedir}/src/main/optional-config</directory>
+                  <directory>${project.basedir}/src/main/resources/config</directory>
                   <filtering>true</filtering>
                   <includes>
                     <include>**</include>

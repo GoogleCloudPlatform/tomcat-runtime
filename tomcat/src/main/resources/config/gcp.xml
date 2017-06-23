@@ -1,5 +1,5 @@
 <Valve className="org.apache.catalina.valves.RemoteIpValve"
 remoteIpHeader="x-forwarded-for"
 protocolHeader="x-forwarded-proto"
-trustedProxies=".*"
+trustedProxies="${gae.proxy.trusted}"
 protocolHeaderHttpsValue="https" />
