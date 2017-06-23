@@ -183,6 +183,25 @@
             </configuration>
           </execution>
           <execution>
+            <id>copy-tomcat-optional-configuration</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/docker-src/config</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/optional-config</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
             <id>copy-structure-test</id>
             <phase>generate-test-resources</phase>
             <goals>

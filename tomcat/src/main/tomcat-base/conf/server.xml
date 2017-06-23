@@ -17,6 +17,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
+<!DOCTYPE server-xml [<!ENTITY gcp-configuration SYSTEM "gcp.xml">]>
 <Server port="-1">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <!-- The security listener enforce the user to be non root.
@@ -48,17 +49,8 @@
       <Host name="localhost"  appBase="webapps"
           unpackWARs="true" autoDeploy="true">
 
-        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-            prefix="access_log" suffix=".txt"
-            pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+        &gcp-configuration;
 
-
-
-        <Valve className="org.apache.catalina.valves.RemoteIpValve"
-            remoteIpHeader="x-forwarded-for"
-            protocolHeader="x-forwarded-proto"
-            trustedProxies=".*"
-            protocolHeaderHttpsValue="https" />
       </Host>
     </Engine>
   </Service>
