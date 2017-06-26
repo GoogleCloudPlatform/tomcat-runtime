@@ -12,7 +12,7 @@ commandTests:
   expectedOutput: ['catalina.sh']
 - name: 'APP_DESTINATION is set'
   command: ['env']
-  expectedOutput: ['APP_DESTINATION=ROOT.war']
+  expectedOutput: ['APP_DESTINATION=${tomcat.base}/webapps/ROOT.war']
 
 fileExistenceTests:
 - name: 'Tomcat home exists'
