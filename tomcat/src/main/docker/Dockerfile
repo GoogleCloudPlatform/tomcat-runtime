@@ -34,6 +34,9 @@ RUN mkdir -p $CATALINA_BASE/webapps \
     && chown -R tomcat:tomcat ${CATALINA_BASE} \
     && chmod -R 400 $CATALINA_BASE/conf
 
+# Set path where apps should be added to the container
+ENV APP_DESTINATION ${CATALINA_BASE}/webapps/ROOT.war
+
 WORKDIR $CATALINA_BASE/webapps
 
 EXPOSE 8080
