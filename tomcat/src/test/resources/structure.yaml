@@ -13,6 +13,11 @@ commandTests:
 - name: 'APP_DESTINATION is set'
   command: ['env']
   expectedOutput: ['APP_DESTINATION=${tomcat.base}/webapps/ROOT.war']
+- name: 'Check the configuration for the GAE environment'
+  setup: [[ 'chmod', '+x', '/workspace/tomcat/src/test/workspace/tomcat-gae.bash' ]]
+  command: [ '/workspace/tomcat/src/test/workspace/tomcat-gae.bash' ]
+  expectedOutput: ['OK']
+  exitCode: 0
 
 fileExistenceTests:
 - name: 'Tomcat home exists'
