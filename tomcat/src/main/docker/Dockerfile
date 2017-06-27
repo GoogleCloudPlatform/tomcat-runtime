@@ -27,10 +27,12 @@ RUN chmod +x ${CATALINA_HOME}/bin/catalina.sh \
 # Create Tomcat base
 ENV CATALINA_BASE ${tomcat.base}
 COPY tomcat-base $CATALINA_BASE
+COPY 50-tomcat.bash /setup-env.d/
+COPY config /config
+
 RUN mkdir -p $CATALINA_BASE/webapps \
     && mkdir -p $CATALINA_BASE/temp \
     && cp $CATALINA_HOME/conf/web.xml $CATALINA_BASE/conf/web.xml \
-    && cp $CATALINA_HOME/conf/catalina.properties $CATALINA_BASE/conf/catalina.properties \
     && chown -R tomcat:tomcat ${CATALINA_BASE} \
     && chmod -R 400 $CATALINA_BASE/conf
 

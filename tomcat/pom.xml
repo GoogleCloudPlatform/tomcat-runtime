@@ -84,6 +84,8 @@
                   <arguments>
                     <argument>--image</argument>
                     <argument>${docker.image.name}:${docker.tag.long}</argument>
+                    <argument>--workspace</argument>
+                    <argument>${project.basedir}/..</argument>
                     <argument>--config</argument>
                     <argument>${project.build.testOutputDirectory}/structure.yaml</argument>
                   </arguments>
@@ -174,6 +176,25 @@
               <resources>
                 <resource>
                   <directory>${project.basedir}/src/main/tomcat-base</directory>
+                  <filtering>true</filtering>
+                  <includes>
+                    <include>**</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-tomcat-optional-configuration</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/docker-src/config</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>${project.basedir}/src/main/resources/config</directory>
                   <filtering>true</filtering>
                   <includes>
                     <include>**</include>
