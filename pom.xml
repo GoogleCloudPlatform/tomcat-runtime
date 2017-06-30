@@ -45,10 +45,12 @@
   </properties>
 
   <modules>
+    <module>tomcat-gcp-lib</module>
     <module>tomcat</module>
     <module>tests/test-war-simple</module>
     <module>tests/test-war-integration</module>
     <module>tests/test-war-spring-boot</module>
+    <module>tests/test-distributed-war</module>
   </modules>
 
   <build>
