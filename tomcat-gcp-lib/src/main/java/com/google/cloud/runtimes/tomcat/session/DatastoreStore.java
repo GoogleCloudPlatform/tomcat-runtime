@@ -86,7 +86,7 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * {@inheritDoc}
+   * Return the number of Sessions present in this Store.
    *
    * <p>The Datastore does not support counting element in a collection
    * so all the keys are fetched and the count is computed locally.</p>
@@ -106,7 +106,8 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * {@inheritDoc}
+   * Return an array containing the session identifiers of all Sessions currently saved in this
+   * Store. If there are no such Sessions, a zero-length array is returned.
    *
    * <p>Fetch all the sessions id present in the datastore.</p>
    *
@@ -134,7 +135,8 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * {@inheritDoc}
+   * Load and return the Session associated with the specified session identifier from this Store,
+   * without removing it. If there is no such stored Session, return null.
    *
    * <p>Look in the datastore for a serialized session and attempt to deserialize it.</p>
    *
@@ -169,9 +171,8 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * {@inheritDoc}
-   *
-   * <p>Remove the session from the datastore.</p>
+   * Remove the Session with the specified session identifier from this Store, if present.
+   * If no such Session is present, this method takes no action.
    *
    * @param id Session identifier of the session to remove
    */
@@ -191,9 +192,10 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * {@inheritDoc}
+   * Save the specified Session into this Store. Any previously saved information for
+   * the associated session identifier is replaced.
    *
-   * <p>Attempt to serialize the session and to store it in the datastore.</p>
+   * <p>Attempt to serialize the session and send it to the datastore.</p>
    *
    * @param session Session to be saved
    */

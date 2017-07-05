@@ -35,7 +35,20 @@ import java.util.Set;
  * Implementation of the Tomcat `Manager` interface which use
  * Google Datastore to replicate sessions.
  *
- * <p>This manager should be used in conjunction of {@link DatastoreValve}</p>
+ * <p>This manager should be used in conjunction of {@link DatastoreValve} and can be used
+ * with {@link DatastoreStore}.<br/>
+ * Example configuration:</p>
+ *
+ * <pre>
+ *   {@code
+ *   <Valve className="com.google.cloud.runtimes.tomcat.session.DatastoreValve" />
+ *   <Manager className="com.google.cloud.runtimes.tomcat.session.DatastoreManager" >
+ *     <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore" />
+ *   </Manager>
+ *   }
+ * </pre>
+ *
+ * <p>The session is never stored locally and always fetch from the datastore.</p>
  */
 public class DatastoreManager extends ManagerBase implements StoreManager {
 
@@ -112,36 +125,38 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   @Override
   public void unload() throws IOException {}
 
-  public Store getStore() {
-    return this.store;
-  }
-
-  public void setStore(Store store) {
-    this.store = store;
-    store.setManager(this);
-  }
-
+  /**
+   * Remove the Session from the manager but not from the Datastore
+   *
+   * @param session The session to remove.
+   */
   @Override
   public void removeSuper(Session session) {
     super.remove(session);
   }
 
+  /**
+   * Remove this Session from the active Sessions for this Manager and in the Datastore.
+   *
+   * @param session The session to remove.
+   */
   @Override
   public void remove(Session session) {
     this.removeSuper(session);
 
     try {
-      store.remove(session.getIdInternal());
+      store.remove(session.getId());
     } catch (IOException e) {
       log.error("An error occurred while removing session" + e.getMessage());
     }
-
   }
 
   /**
-   * {@inheritDoc}
+   * Returns the total session count in the Store.
    *
-   * <p>Note: Aggregation can be slow on the datastore, avoid repeated usage.</p>
+   * <p>Note: Aggregation can be slow on the Datastore, cache the result if possible</p>
+   *
+   * @return the session count.
    */
   @Override
   public int getActiveSessionsFull() {
@@ -157,9 +172,11 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * {@inheritDoc}
+   * Returns the list of all sessions IDS or null if an error occur.
    *
    * <p>Note: Listing all the keys can be slow on the datastore.</p>
+   *
+   * @return The complete set of sessions IDs across the cluster.
    */
   @Override
   public Set<String> getSessionIdsFull() {
@@ -172,5 +189,14 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     }
 
     return sessionsId;
+  }
+
+  public Store getStore() {
+    return this.store;
+  }
+
+  public void setStore(Store store) {
+    this.store = store;
+    store.setManager(this);
   }
 }
