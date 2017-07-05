@@ -60,9 +60,9 @@ public class DatastoreStore extends StoreBase {
   private KeyQuery.Builder keyQueryBuilder = null;
 
   /**
-   * Name of the kind use in datastore for the session.
+   * Name of the kind used in datastore for the session.
    */
-  private String kind = "Session";
+  private String sessionKind = "Session";
 
   /**
    * Namespace to use in datastore.
@@ -79,10 +79,10 @@ public class DatastoreStore extends StoreBase {
   protected synchronized void startInternal() throws LifecycleException {
 
     log.debug("Start Datastore Store");
-
+    log.debug("Namespace in use:" + this.namespace);
     this.datastore = DatastoreOptions.getDefaultInstance().getService();
-    this.keyFactory = datastore.newKeyFactory().setNamespace(namespace).setKind(kind);
-    this.keyQueryBuilder = Query.newKeyQueryBuilder().setNamespace(namespace).setKind(kind);
+    this.keyFactory = datastore.newKeyFactory().setNamespace(namespace).setKind(sessionKind);
+    this.keyQueryBuilder = Query.newKeyQueryBuilder().setNamespace(namespace).setKind(sessionKind);
 
     super.startInternal();
   }
@@ -216,5 +216,13 @@ public class DatastoreStore extends StoreBase {
         .build();
 
     datastore.put(sessionEntity);
+  }
+
+  public void setNamespace(String namespace) {
+    this.namespace = namespace;
+  }
+
+  public void setSessionKind(String sessionKind) {
+    this.sessionKind = sessionKind;
   }
 }

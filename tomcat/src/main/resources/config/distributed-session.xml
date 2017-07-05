@@ -1,4 +1,6 @@
 <Valve className="com.google.cloud.runtimes.tomcat.session.DatastoreValve" />
 <Manager className="com.google.cloud.runtimes.tomcat.session.DatastoreManager" >
-  <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore" />
+  <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore"
+         namespace="${session.DatastoreStore.namespace}"
+         sessionKind="${session.DatastoreStore.sessionKind}"/>
 </Manager>
