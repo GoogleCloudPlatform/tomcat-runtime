@@ -133,7 +133,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     try {
       store.remove(session.getIdInternal());
     } catch (IOException e) {
-      log.warn("An error occurred while removing session" + e.getMessage());
+      log.error("An error occurred while removing session" + e.getMessage());
     }
 
   }
@@ -145,8 +145,15 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
    */
   @Override
   public int getActiveSessionsFull() {
-    log.warn("The number of session have be queried, this could cause performance issue");
-    return 0;
+    log.warn("The number of session have been queried, this could cause performance issues");
+    int sessionCount = 0;
+    try {
+      sessionCount = store.getSize();
+    } catch (IOException e) {
+      log.error("An error occurred while counting active session: " + e);
+    }
+
+    return sessionCount;
   }
 
   /**
@@ -161,7 +168,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
       String[] keys = this.store.keys();
       sessionsId = new HashSet<>(Arrays.asList(keys));
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("An error occurred while listing active session: " + e);
     }
 
     return sessionsId;
