@@ -22,6 +22,7 @@ import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.collect.Streams;
@@ -56,6 +57,7 @@ public class DatastoreStore extends StoreBase {
 
   private Datastore datastore = null;
   private KeyFactory keyFactory = null;
+  private KeyQuery.Builder keyQueryBuilder = null;
 
   /**
    * Name of the kind use in datastore for the session.
@@ -64,9 +66,8 @@ public class DatastoreStore extends StoreBase {
 
   /**
    * Namespace to use in datastore.
-   * TODO(cassand): Actually use namespace
    */
-  private String namespace = "";
+  private String namespace = "tomcat-gcp-persistent-session";
 
   /**
    * {@inheritDoc}
@@ -80,7 +81,8 @@ public class DatastoreStore extends StoreBase {
     log.debug("Start Datastore Store");
 
     this.datastore = DatastoreOptions.getDefaultInstance().getService();
-    this.keyFactory = datastore.newKeyFactory().setKind(kind);
+    this.keyFactory = datastore.newKeyFactory().setNamespace(namespace).setKind(kind);
+    this.keyQueryBuilder = Query.newKeyQueryBuilder().setNamespace(namespace).setKind(kind);
 
     super.startInternal();
   }
@@ -99,7 +101,7 @@ public class DatastoreStore extends StoreBase {
   @Override
   public int getSize() throws IOException {
     log.debug("Accessing sessions count, be cautious this operation is not suited for datastore");
-    Query<Key> query = Query.newKeyQueryBuilder().setKind(kind).build();
+    Query<Key> query = this.keyQueryBuilder.build();
     QueryResults<Key> results = datastore.run(query);
     long count = Streams.stream(results).count();
     return Math.toIntExact(count);
@@ -121,7 +123,7 @@ public class DatastoreStore extends StoreBase {
     log.debug("Enumerating all the sessions keys, be cautious there is no caching of this keys");
     String[] keys;
 
-    Query<Key> query = Query.newKeyQueryBuilder().setKind(kind).build();
+    Query<Key> query = this.keyQueryBuilder.build();
     QueryResults<Key> results = datastore.run(query);
     keys = Streams.stream(results)
         .map(key -> key.getNameOrId().toString())
