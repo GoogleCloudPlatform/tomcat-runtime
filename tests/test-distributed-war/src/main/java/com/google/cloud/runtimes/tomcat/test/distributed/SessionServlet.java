@@ -23,8 +23,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * This servlet help to test the usage of distributed session by adding session parameters and
+ * modifying their values at each requests.
+ */
 @WebServlet(urlPatterns = {"/session"})
-public class HelloServlet extends HttpServlet {
+public class SessionServlet extends HttpServlet {
 
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -9,13 +9,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.collect.Streams;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Arrays;
+
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Session;
 import org.apache.catalina.session.StandardSession;
@@ -23,14 +17,22 @@ import org.apache.catalina.session.StoreBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Arrays;
+
 /**
  * This store interact with the datastore service to persist and manage sessions.
  *
- * It does not make any assumptions about the manager, so it could be used
- * by all manager implementations.
+ * <p>It does not make any assumptions about the manager, so it could be used
+ * by all manager implementations.</p>
  *
- * However aggregations are slow on the Datastore so for performance prefer using a manager
- * who is not using aggregations such as {@link DatastoreManager}
+ * <p>However aggregations are slow on the Datastore so for performance prefer using a manager
+ * who is not using aggregations such as {@link DatastoreManager}</p>
  */
 public class DatastoreStore extends StoreBase {
 
@@ -53,8 +55,8 @@ public class DatastoreStore extends StoreBase {
   /**
    * {@inheritDoc}
    *
-   * Initiate a connection to the datastore.
-   * @throws LifecycleException
+   * <p>Initiate a connection to the datastore.</p>
+   *
    */
   @Override
   protected synchronized void startInternal() throws LifecycleException {
@@ -70,12 +72,13 @@ public class DatastoreStore extends StoreBase {
   /**
    * {@inheritDoc}
    *
-   * Datastore does not support counting element in a collection
-   * so all the keys are fetched and the count is compute locally.
+   * <p>The Datastore does not support counting element in a collection
+   * so all the keys are fetched and the count is computed locally.</p>
    *
-   * This method may be slow if a large number of sessions are persisted,
-   * prefer operations on individual entity rather than aggregations.
-   * @return
+   * <p>This method may be slow if a large number of sessions are persisted,
+   * prefer operations on individual entity rather than aggregations.</p>
+   *
+   * @return The number of sessions stored into the datastore
    */
   @Override
   public int getSize() throws IOException {
@@ -89,10 +92,10 @@ public class DatastoreStore extends StoreBase {
   /**
    * {@inheritDoc}
    *
-   * Fetch all the sessions id present in the datastore.
+   * <p>Fetch all the sessions id present in the datastore.</p>
    *
-   * This operation may be slow if a large number of sessions are persisted.
-   * Note that the number of key returned may be bounded by the datastore configuration.
+   * <p>This operation may be slow if a large number of sessions are persisted.
+   * Note that the number of key returned may be bounded by the datastore configuration.</p>
    *
    * @return The ids of all the persisted sessions
    */
@@ -117,12 +120,10 @@ public class DatastoreStore extends StoreBase {
   /**
    * {@inheritDoc}
    *
-   * Look in the datastore for a serialized session and attempt to deserialize it.
+   * <p>Look in the datastore for a serialized session and attempt to deserialize it.</p>
    *
-   * If the session is successfully deserialized it is added to the current manage and
-   * return by this function.
-   *
-   * Otherwise null is returned
+   * <p>If the session is successfully deserialized it is added to the current manage and
+   * return by this function. Otherwise null is returned </p>
    *
    * @param id Session identifier of the session to load
    * @return The loaded session instance
@@ -154,7 +155,8 @@ public class DatastoreStore extends StoreBase {
   /**
    * {@inheritDoc}
    *
-   * Remove the session from the datastore.
+   * <p>Remove the session from the datastore.</p>
+   *
    * @param id Session identifier of the session to remove
    */
   @Override
@@ -164,7 +166,7 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * {@inheritDoc}
+   * Remove all Sessions from this Store.
    */
   @Override
   public void clear() throws IOException {
@@ -175,7 +177,7 @@ public class DatastoreStore extends StoreBase {
   /**
    * {@inheritDoc}
    *
-   * Attempt to serialize the session and to store it in the datastore.
+   * <p>Attempt to serialize the session and to store it in the datastore.</p>
    *
    * @param session Session to be saved
    */

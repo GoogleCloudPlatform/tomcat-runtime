@@ -1,7 +1,5 @@
 package com.google.cloud.runtimes.tomcat.session;
 
-import java.io.IOException;
-import java.util.Set;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
@@ -12,11 +10,16 @@ import org.apache.catalina.session.ManagerBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Implementation of the Tomcat `Manager` interface which use
  * Google Datastore to replicate sessions.
  *
- * This manager should be used in conjunction of {@link DatastoreValve}
+ * <p>This manager should be used in conjunction of {@link DatastoreValve}</p>
  */
 public class DatastoreManager extends ManagerBase implements StoreManager {
 
@@ -25,15 +28,16 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   private static final String name = "DatastoreManager";
 
   /**
-   * Store object which will manage the Session store.
+   * The store will be in charge of all the interaction with the Datastore.
    */
   protected Store store = null;
 
   /**
    * {@inheritDoc}
    *
-   * Ensure that a store is present and initialized.
-   * @throws LifecycleException
+   * <p>Ensure that a store is present and initialized.</p>
+   *
+   * @throws LifecycleException If an error occur during the store initialisation
    */
   @Override
   protected synchronized void startInternal() throws LifecycleException {
@@ -49,8 +53,6 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * {@inheritDoc}
-   *
    * Search into the store for an existing session with the specified id.
    *
    * @param id The session id for the session to be returned
@@ -74,24 +76,25 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   /**
    * {@inheritDoc}
    *
+   * <p>Note: Sessions are loaded at each request therefore no session is loaded at
+   * initialization.</p>
+   *
    * @throws ClassNotFoundException Cannot occurs
    * @throws IOException Cannot occurs
    */
   @Override
-  public void load() throws ClassNotFoundException, IOException {
-    // Sessions are loaded at each request therefore no session is loaded at initialization
-  }
+  public void load() throws ClassNotFoundException, IOException {}
 
   /**
    * {@inheritDoc}
    *
+   * <p>Note: Sessions are persisted after each requests but never saved into the local manager,
+   * therefore no operation is needed during unload.</p>
+   *
    * @throws IOException Cannot occurs
    */
   @Override
-  public void unload() throws IOException {
-    // Sessions are persisted after each requests but never saved into the local manager,
-    // therefore no operation is needed during unload.
-  }
+  public void unload() throws IOException {}
 
   public Store getStore() {
     return this.store;
@@ -109,20 +112,20 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
 
   @Override
   public void remove(Session session) {
-   this.removeSuper(session);
+    this.removeSuper(session);
 
-   try {
-     store.remove(session.getIdInternal());
-   } catch (IOException e) {
-     log.warn("An error occurred while removing session" + e.getMessage());
-   }
+    try {
+      store.remove(session.getIdInternal());
+    } catch (IOException e) {
+      log.warn("An error occurred while removing session" + e.getMessage());
+    }
 
   }
 
   /**
    * {@inheritDoc}
    *
-   * Note: Aggregation can be slow on the datastore, avoid repeated usage.
+   * <p>Note: Aggregation can be slow on the datastore, avoid repeated usage.</p>
    */
   @Override
   public int getActiveSessionsFull() {
@@ -132,9 +135,19 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
 
   /**
    * {@inheritDoc}
+   *
+   * <p>Note: Listing all the keys can be slow on the datastore.</p>
    */
   @Override
   public Set<String> getSessionIdsFull() {
-    return null;
+    Set<String> sessionsId = null;
+    try {
+      String[] keys = this.store.keys();
+      sessionsId = new HashSet<>(Arrays.asList(keys));
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    return sessionsId;
   }
 }

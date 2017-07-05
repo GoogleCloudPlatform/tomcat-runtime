@@ -1,7 +1,5 @@
 package com.google.cloud.runtimes.tomcat.session;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import org.apache.catalina.Context;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -11,6 +9,9 @@ import org.apache.catalina.connector.Response;
 import org.apache.catalina.valves.ValveBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
 
 /**
  * This valve use the Store Manager to persist the session after each request.
@@ -22,7 +23,7 @@ public class DatastoreValve extends ValveBase {
   /**
    * {@inheritDoc}
    *
-   * If the manager contain a store use it to persist the session at the end of the request.
+   * <p>If the manager contain a store use it to persist the session at the end of the request.</p>
    */
   @Override
   public void invoke(Request request, Response response) throws IOException, ServletException {
