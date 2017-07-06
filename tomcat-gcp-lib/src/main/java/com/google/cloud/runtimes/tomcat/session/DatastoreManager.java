@@ -191,6 +191,17 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     return sessionsId;
   }
 
+  @Override
+  protected void stopInternal() throws LifecycleException {
+    super.stopInternal();
+
+    if (store instanceof Lifecycle) {
+      ((Lifecycle) store).stop();
+    }
+
+    setState(LifecycleState.STOPPING);
+  }
+
   public Store getStore() {
     return this.store;
   }
