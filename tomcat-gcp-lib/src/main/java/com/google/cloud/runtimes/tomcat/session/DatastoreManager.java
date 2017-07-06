@@ -32,7 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Implementation of the Tomcat `Manager` interface which use
+ * Implementation of the {@code org.apache.catalina.Manager} interface which use the
  * Google Datastore to replicate sessions.
  *
  * <p>This manager should be used in conjunction of {@link DatastoreValve} and can be used

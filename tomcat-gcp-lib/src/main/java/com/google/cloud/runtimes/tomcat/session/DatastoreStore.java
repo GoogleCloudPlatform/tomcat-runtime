@@ -79,7 +79,7 @@ public class DatastoreStore extends StoreBase {
   protected synchronized void startInternal() throws LifecycleException {
 
     log.debug("Start Datastore Store");
-    log.debug("Namespace in use:" + this.namespace);
+    log.debug("Using namespace: " + this.namespace);
     this.datastore = DatastoreOptions.getDefaultInstance().getService();
     this.keyFactory = datastore.newKeyFactory().setNamespace(namespace).setKind(sessionKind);
     this.keyQueryBuilder = Query.newKeyQueryBuilder().setNamespace(namespace).setKind(sessionKind);
@@ -100,7 +100,7 @@ public class DatastoreStore extends StoreBase {
    */
   @Override
   public int getSize() throws IOException {
-    log.debug("Accessing sessions count, be cautious this operation is not suited for datastore");
+    log.debug("Accessing sessions count, be cautious this operation is cached by the datastore");
     Query<Key> query = this.keyQueryBuilder.build();
     QueryResults<Key> results = datastore.run(query);
     long count = Streams.stream(results).count();
@@ -120,7 +120,6 @@ public class DatastoreStore extends StoreBase {
    */
   @Override
   public String[] keys() throws IOException {
-    log.debug("Enumerating all the sessions keys, be cautious there is no caching of this keys");
     String[] keys;
 
     Query<Key> query = this.keyQueryBuilder.build();
@@ -151,7 +150,7 @@ public class DatastoreStore extends StoreBase {
    */
   @Override
   public Session load(String id) throws ClassNotFoundException, IOException {
-    log.debug("Session " + id + " accessed");
+    log.debug("Session " + id + " requested");
     StandardSession session = null;
 
     Entity sessionEntity = datastore.get(keyFactory.newKey(id));
@@ -169,6 +168,7 @@ public class DatastoreStore extends StoreBase {
       }
     }
 
+    log.debug("Session " + id + " loaded");
     return session;
   }
 
