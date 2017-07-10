@@ -1,5 +1,3 @@
-package com.google.cloud.runtimes.tomcat.test.distributed;
-
 /*
  * Copyright (C) 2017 Google Inc.
  *
@@ -16,6 +14,8 @@ package com.google.cloud.runtimes.tomcat.test.distributed;
  * limitations under the License.
  */
 
+package com.google.cloud.runtimes.tomcat.test.distributed;
+
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * This servlet help to test the usage of distributed session by adding session parameters and
+ * This servlet demonstrate the usage of distributed session by adding session parameters and
  * modifying their values at each requests.
  */
 @WebServlet(urlPatterns = {"/session"})
