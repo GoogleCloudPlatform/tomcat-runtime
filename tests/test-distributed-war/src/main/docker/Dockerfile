@@ -17,4 +17,4 @@ ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
 COPY credential.json /credentials/key.json
 ENV GOOGLE_APPLICATION_CREDENTIALS /credentials/key.json
 
-ENV ENABLE_DISTRIBUTED_SESSION true
+ENV ENABLE_DISTRIBUTED_SESSIONS true

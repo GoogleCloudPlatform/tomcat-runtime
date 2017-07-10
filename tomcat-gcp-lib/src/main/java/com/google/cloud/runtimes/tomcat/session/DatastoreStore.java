@@ -61,7 +61,7 @@ public class DatastoreStore extends StoreBase {
   /**
    * Name of the kind used in The Datastore for the session.
    */
-  private String sessionKind = "Session";
+  private String sessionKind = "GCloudSession";
 
   /**
    * Namespace to use in the Datastore.
