@@ -78,9 +78,9 @@ public class DatastoreStore extends StoreBase {
   protected synchronized void startInternal() throws LifecycleException {
     log.debug("Initialization of the Datastore Store");
 
-    this.datastore = DatastoreOptions.getDefaultInstance().getService();
-    this.keyFactory = datastore.newKeyFactory().setNamespace(namespace).setKind(sessionKind);
-    this.keyQueryBuilder = Query.newKeyQueryBuilder().setNamespace(namespace).setKind(sessionKind);
+    this.datastore = DatastoreOptions.newBuilder().setNamespace(namespace).build().getService();
+    this.keyFactory = datastore.newKeyFactory().setKind(sessionKind);
+    this.keyQueryBuilder = Query.newKeyQueryBuilder().setKind(sessionKind);
 
     super.startInternal();
   }
