@@ -136,7 +136,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * Remove this Session from the active Sessions for this Manager and in the Datastore.
+   * Remove this Session from the active Sessions and the Datastore.
    *
    * @param session The session to remove.
    */
@@ -152,7 +152,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * Returns the total session count in the Store.
+   * Returns the number of session present in the Store.
    *
    * <p>Note: Aggregation can be slow on the Datastore, cache the result if possible</p>
    *
@@ -160,21 +160,20 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
    */
   @Override
   public int getActiveSessionsFull() {
-    log.warn("The number of session have been queried, this could cause performance issues");
     int sessionCount = 0;
     try {
       sessionCount = store.getSize();
     } catch (IOException e) {
-      log.error("An error occurred while counting active session: " + e);
+      log.error("An error occurred while counting sessions: " + e);
     }
 
     return sessionCount;
   }
 
   /**
-   * Returns the list of all sessions IDS or null if an error occur.
+   * Returns a set of all sessions IDs or null if an error occur.
    *
-   * <p>Note: Listing all the keys can be slow on the datastore.</p>
+   * <p>Note: Listing all the keys can be slow on the Datastore.</p>
    *
    * @return The complete set of sessions IDs across the cluster.
    */

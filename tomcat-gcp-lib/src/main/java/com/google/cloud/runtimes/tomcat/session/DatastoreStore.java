@@ -34,7 +34,6 @@ import org.apache.catalina.session.StoreBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,13 +42,13 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 
 /**
- * This store interact with the datastore service to persist and manage sessions.
+ * This store interact with the Datastore service to persist sessions.
  *
  * <p>It does not make any assumptions about the manager, so it could be used
  * by all manager implementations.</p>
  *
- * <p>However aggregations are slow on the Datastore so for performance prefer using a manager
- * who is not using aggregations such as {@link DatastoreManager}</p>
+ * <p>However aggregations can be slow on the Datastore so if performance is a concern prefer using
+ * a manager implementation which is not using aggregations such as {@link DatastoreManager}</p>
  */
 public class DatastoreStore extends StoreBase {
 
@@ -60,26 +59,25 @@ public class DatastoreStore extends StoreBase {
   private KeyQuery.Builder keyQueryBuilder = null;
 
   /**
-   * Name of the kind used in datastore for the session.
+   * Name of the kind used in The Datastore for the session.
    */
   private String sessionKind = "Session";
 
   /**
-   * Namespace to use in datastore.
+   * Namespace to use in the Datastore.
    */
   private String namespace = "tomcat-gcp-persistent-session";
 
   /**
    * {@inheritDoc}
    *
-   * <p>Initiate a connection to the datastore.</p>
+   * <p>Initiate a connection to the Datastore.</p>
    *
    */
   @Override
   protected synchronized void startInternal() throws LifecycleException {
+    log.debug("Initialization of the Datastore Store");
 
-    log.debug("Start Datastore Store");
-    log.debug("Using namespace: " + this.namespace);
     this.datastore = DatastoreOptions.getDefaultInstance().getService();
     this.keyFactory = datastore.newKeyFactory().setNamespace(namespace).setKind(sessionKind);
     this.keyQueryBuilder = Query.newKeyQueryBuilder().setNamespace(namespace).setKind(sessionKind);
@@ -96,11 +94,11 @@ public class DatastoreStore extends StoreBase {
    * <p>This method may be slow if a large number of sessions are persisted,
    * prefer operations on individual entity rather than aggregations.</p>
    *
-   * @return The number of sessions stored into the datastore
+   * @return The number of sessions stored into the Datastore
    */
   @Override
   public int getSize() throws IOException {
-    log.debug("Accessing sessions count, be cautious this operation is cached by the datastore");
+    log.debug("Accessing sessions count, be cautious this operation can cause performance issues");
     Query<Key> query = this.keyQueryBuilder.build();
     QueryResults<Key> results = datastore.run(query);
     long count = Streams.stream(results).count();
@@ -111,10 +109,8 @@ public class DatastoreStore extends StoreBase {
    * Return an array containing the session identifiers of all Sessions currently saved in this
    * Store. If there are no such Sessions, a zero-length array is returned.
    *
-   * <p>Fetch all the sessions id present in the datastore.</p>
-   *
    * <p>This operation may be slow if a large number of sessions are persisted.
-   * Note that the number of key returned may be bounded by the datastore configuration.</p>
+   * Note that the number of key returned may be bounded by the Datastore configuration.</p>
    *
    * @return The ids of all the persisted sessions
    */
@@ -141,8 +137,8 @@ public class DatastoreStore extends StoreBase {
    *
    * <p>Look in the datastore for a serialized session and attempt to deserialize it.</p>
    *
-   * <p>If the session is successfully deserialized it is added to the current manage and
-   * return by this function. Otherwise null is returned </p>
+   * <p>If the session is successfully deserialized, it is added to the current manager and is
+   * returned by this method. Otherwise null is returned </p>
    *
    * @param id Session identifier of the session to load
    * @return The loaded session instance
@@ -190,7 +186,9 @@ public class DatastoreStore extends StoreBase {
   @Override
   public void clear() throws IOException {
     log.debug("Deleting all sessions");
-    Arrays.stream(keys()).forEach(this::remove);
+    datastore.delete(Arrays.stream(keys())
+                           .map(keyFactory::newKey)
+                           .toArray(Key[]::new));
   }
 
   /**
