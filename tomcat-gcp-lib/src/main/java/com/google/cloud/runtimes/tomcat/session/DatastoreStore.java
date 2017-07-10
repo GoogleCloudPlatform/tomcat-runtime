@@ -206,13 +206,15 @@ public class DatastoreStore extends StoreBase {
     log.debug("Persisting session: " + session.getId());
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(bos));
+    ObjectOutputStream oos = new ObjectOutputStream(bos);
+    if (!(session instanceof StandardSession)) {
+      throw new IOException("The session must be an instance of StandardSession to be serialized");
+    }
     ((StandardSession)session).writeObjectData(oos);
     oos.flush();
-    byte[] serializedSession = bos.toByteArray();
 
     Entity sessionEntity = Entity.newBuilder(keyFactory.newKey(session.getId()))
-        .set("content", Blob.copyFrom(serializedSession))
+        .set("content", Blob.copyFrom(bos.toByteArray()))
         .build();
 
     datastore.put(sessionEntity);
