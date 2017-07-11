@@ -33,7 +33,7 @@ public class SessionServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-    resp.setContentType("text.plain");
+    resp.setContentType("text/plain");
 
     int count = 0;
     Object sessionValue = req.getSession().getAttribute("count");
