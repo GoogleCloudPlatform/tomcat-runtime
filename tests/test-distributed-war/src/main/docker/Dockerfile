@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 FROM ${test.docker.image}
-ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
+ADD ${project.build.finalName}.war $APP_DESTINATION
 
 COPY credential.json /credentials/key.json
 ENV GOOGLE_APPLICATION_CREDENTIALS /credentials/key.json
