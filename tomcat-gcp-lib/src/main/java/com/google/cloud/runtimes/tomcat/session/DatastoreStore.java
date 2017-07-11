@@ -197,6 +197,8 @@ public class DatastoreStore extends StoreBase {
    *
    * <p>Attempt to serialize the session and send it to the datastore.</p>
    *
+   * @throws IOException If an error occur during the serialization of the session.
+   *
    * @param session Session to be saved
    */
   @Override
@@ -225,4 +227,5 @@ public class DatastoreStore extends StoreBase {
   public void setSessionKind(String sessionKind) {
     this.sessionKind = sessionKind;
   }
+
 }

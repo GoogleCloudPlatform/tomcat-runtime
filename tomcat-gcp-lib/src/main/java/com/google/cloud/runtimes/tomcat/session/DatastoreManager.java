@@ -32,10 +32,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Implementation of the {@code org.apache.catalina.Manager} interface which use the
+ * Implementation of the {@code org.apache.catalina.Manager} interface which uses the
  * Google Datastore to replicate sessions.
  *
- * <p>This manager should be used in conjunction of {@link DatastoreValve} and can be used
+ * <p>This manager should be used in conjunction with {@link DatastoreValve} and can be used
  * with {@link DatastoreStore}.<br/>
  * Example configuration:</p>
  *
@@ -48,7 +48,7 @@ import java.util.Set;
  *   }
  * </pre>
  *
- * <p>The session is never stored locally and always fetch from the datastore.</p>
+ * <p>The session is never stored locally and always fetched from the datastore.</p>
  */
 public class DatastoreManager extends ManagerBase implements StoreManager {
 
@@ -82,7 +82,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * Search into the store for an existing session with the specified id.
+   * Search in the store for an existing session with the specified id.
    *
    * @param id The session id for the session to be returned
    * @return The request session or null if a session with the requested ID could not be found
@@ -96,7 +96,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     try {
       session = this.getStore().load(id);
     } catch (ClassNotFoundException ex) {
-      log.warn("An error occurred during session deserialization" + ex);
+      log.warn("An error occurred during session deserialization", ex);
     }
 
     return session;
@@ -147,7 +147,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     try {
       store.remove(session.getId());
     } catch (IOException e) {
-      log.error("An error occurred while removing session" + e.getMessage());
+      log.error("An error occurred while removing session with id: " + session.getId(), e);
     }
   }
 
@@ -164,7 +164,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     try {
       sessionCount = store.getSize();
     } catch (IOException e) {
-      log.error("An error occurred while counting sessions: " + e);
+      log.error("An error occurred while counting sessions: ", e);
     }
 
     return sessionCount;
@@ -184,7 +184,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
       String[] keys = this.store.keys();
       sessionsId = new HashSet<>(Arrays.asList(keys));
     } catch (IOException e) {
-      log.error("An error occurred while listing active session: " + e);
+      log.error("An error occurred while listing active sessions: ", e);
     }
 
     return sessionsId;
