@@ -152,15 +152,11 @@ public class DatastoreStore extends StoreBase {
     Entity sessionEntity = datastore.get(keyFactory.newKey(id));
 
     if (sessionEntity != null) {
-      try {
-        InputStream fis = sessionEntity.getBlob("content").asInputStream();
-        ObjectInputStream ois = getObjectInputStream(fis);
+      try (InputStream fis = sessionEntity.getBlob("content").asInputStream();
+          ObjectInputStream ois = getObjectInputStream(fis)) {
         session = (StandardSession) manager.createEmptySession();
         session.readObjectData(ois);
         session.setManager(manager);
-      } catch (IOException e) {
-        log.warn("An error occurred during session deserialization");
-        session = null;
       }
     }
 
