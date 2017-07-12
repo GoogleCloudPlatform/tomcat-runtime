@@ -61,12 +61,12 @@ public class DatastoreStore extends StoreBase {
   /**
    * Name of the kind used in The Datastore for the session.
    */
-  private String sessionKind = "GCloudSession";
+  private String sessionKind;
 
   /**
    * Namespace to use in the Datastore.
    */
-  private String namespace = "tomcat-gcp-persistent-session";
+  private String namespace;
 
   /**
    * {@inheritDoc}
