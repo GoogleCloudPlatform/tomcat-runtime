@@ -54,8 +54,6 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
 
   private static final Log log = LogFactory.getLog(DatastoreManager.class);
 
-  private static final String name = "DatastoreManager";
-
   /**
    * The store will be in charge of all the interaction with the Datastore.
    */
