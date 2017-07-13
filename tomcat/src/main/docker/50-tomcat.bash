@@ -1,15 +1,21 @@
 #!/bin/bash
 
-# If we are deploying on a GAE platform, copy gcp configuration
+# If we are deploying on a GAE platform, enable the GCP module
 if [ "$PLATFORM" == "gae" ]; then
-  cp /config/gcp.xml ${CATALINA_BASE}/conf/gcp.xml
+  TOMCAT_MODULE_ENABLE="$TOMCAT_MODULE_ENABLE,gcp"
 fi
 
-if [ "$ENABLE_DISTRIBUTED_SESSIONS" == "true" ]; then
-  cp /config/distributed-session.xml ${CATALINA_BASE}/conf/distributed-session.xml
+if [ -n "$TOMCAT_MODULE_ENABLE" ]; then
+  echo "$TOMCAT_MODULE_ENABLE" | tr ',' '\n' | while read module; do
+    if [ -r "/config/${module}.xml" ]; then
+      cp "/config/${module}.xml" "${CATALINA_BASE}/conf/${module}.xml"
+    fi
+  done
+fi
 
-  if [ -n "$DISTRIBUTED_SESSIONS_NAMESPACE" ]; then
-     echo "session.DatastoreStore.namespace=${DISTRIBUTED_SESSIONS_NAMESPACE}" \
-          >> ${CATALINA_BASE}/conf/catalina.properties
-  fi
+# Add all the user defined properties to catalina.properties
+if [ -n "$TOMCAT_PROPERTIES" ]; then
+  echo "$TOMCAT_PROPERTIES" | tr ',' '\n' | while read property; do
+    echo ${property} >> ${CATALINA_BASE}/conf/catalina.properties
+  done
 fi
