@@ -5,8 +5,8 @@ if [ "$PLATFORM" == "gae" ]; then
   TOMCAT_MODULE_ENABLE="$TOMCAT_MODULE_ENABLE,gcp"
 fi
 
-if [ -n "$TOMCAT_MODULE_ENABLE" ]; then
-  echo "$TOMCAT_MODULE_ENABLE" | tr ',' '\n' | while read module; do
+if [ -n "$TOMCAT_MODULES_ENABLE" ]; then
+  echo "$TOMCAT_MODULES_ENABLE" | tr ',' '\n' | while read module; do
     if [ -r "/config/${module}.xml" ]; then
       cp "/config/${module}.xml" "${CATALINA_BASE}/conf/${module}.xml"
     fi

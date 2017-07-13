@@ -17,4 +17,4 @@ ADD ${project.build.finalName}.war $APP_DESTINATION
 COPY credential.json /credentials/key.json
 ENV GOOGLE_APPLICATION_CREDENTIALS /credentials/key.json
 
-ENV TOMCAT_MODULE_ENABLE distributed-session
+ENV TOMCAT_MODULES_ENABLE distributed-session
