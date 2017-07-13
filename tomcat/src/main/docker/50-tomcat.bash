@@ -19,3 +19,9 @@ if [ -n "$TOMCAT_PROPERTIES" ]; then
     echo ${property} >> ${CATALINA_BASE}/conf/catalina.properties
   done
 fi
+
+if [ -n "$TOMCAT_LOGGING_PROPERTIES" ]; then
+  echo "$TOMCAT_LOGGING_PROPERTIES" | tr ',' '\n' | while read property; do
+    echo ${property} >> ${CATALINA_BASE}/conf/logging.properties
+  done
+fi

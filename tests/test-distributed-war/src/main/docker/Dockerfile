@@ -18,3 +18,4 @@ COPY credential.json /credentials/key.json
 ENV GOOGLE_APPLICATION_CREDENTIALS /credentials/key.json
 
 ENV TOMCAT_MODULES_ENABLE distributed-session
+ENV TOMCAT_LOGGING_PROPERTIES com.google.cloud.runtimes.tomcat.session.level=ALL
