@@ -203,6 +203,11 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     return this.store;
   }
 
+  /**
+   * The store will be injected by Tomcat on startup.
+   *
+   * <p>See distributed-session.xml for the configuration.</p>
+   */
   public void setStore(Store store) {
     this.store = store;
     store.setManager(this);

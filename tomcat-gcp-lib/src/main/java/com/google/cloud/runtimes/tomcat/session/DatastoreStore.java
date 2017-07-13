@@ -218,10 +218,18 @@ public class DatastoreStore extends StoreBase {
     datastore.put(sessionEntity);
   }
 
+  /**
+   * This property will be injected by Tomcat on startup.
+   *
+   * <p>See context.xml and catalina.properties for the default values</p>
+   */
   public void setNamespace(String namespace) {
     this.namespace = namespace;
   }
 
+  /**
+   * This property will be injected by Tomcat on startup.
+   */
   public void setSessionKind(String sessionKind) {
     this.sessionKind = sessionKind;
   }
