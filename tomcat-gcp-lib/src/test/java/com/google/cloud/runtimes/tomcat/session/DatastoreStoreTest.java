@@ -123,7 +123,7 @@ public class DatastoreStoreTest {
     store.save(session2);
 
     int size = store.getSize();
-    assertEquals(size, 2);
+    assertEquals(2, size);
   }
 
   @Test

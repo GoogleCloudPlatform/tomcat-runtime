@@ -2,7 +2,7 @@
 
 # If we are deploying on a GAE platform, enable the GCP module
 if [ "$PLATFORM" == "gae" ]; then
-  TOMCAT_MODULE_ENABLE="$TOMCAT_MODULE_ENABLE,gcp"
+  TOMCAT_MODULES_ENABLE="$TOMCAT_MODULES_ENABLE,gcp"
 fi
 
 if [ -n "$TOMCAT_MODULES_ENABLE" ]; then
