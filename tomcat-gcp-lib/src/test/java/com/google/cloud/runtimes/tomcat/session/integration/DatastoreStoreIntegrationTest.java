@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.session;
+package com.google.cloud.runtimes.tomcat.session.integration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,6 +30,8 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.runtimes.tomcat.session.DatastoreManager;
+import com.google.cloud.runtimes.tomcat.session.DatastoreStore;
 import com.google.common.collect.Streams;
 import java.io.IOException;
 import java.util.Arrays;
@@ -51,7 +53,7 @@ import org.junit.Test;
  *
  * If no credentials can be found for the Datastore those tests are ignored.
  */
-public class DatastoreStoreTest {
+public class DatastoreStoreIntegrationTest {
 
   private static DatastoreStore store;
   private static Datastore datastore;
