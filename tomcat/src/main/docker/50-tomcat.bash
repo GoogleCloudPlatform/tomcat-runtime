@@ -9,6 +9,8 @@ if [ -n "$TOMCAT_MODULES_ENABLE" ]; then
   echo "$TOMCAT_MODULES_ENABLE" | tr ',' '\n' | while read module; do
     if [ -r "/config/${module}.xml" ]; then
       cp "/config/${module}.xml" "${CATALINA_BASE}/conf/${module}.xml"
+    else
+      echo "The configuration for the module ${module} does not exist" >&2
     fi
   done
 fi
