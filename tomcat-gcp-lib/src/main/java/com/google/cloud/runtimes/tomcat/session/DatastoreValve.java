@@ -54,6 +54,8 @@ public class DatastoreValve extends ValveBase {
     Session session = request.getSessionInternal(false);
     if (session != null) {
       log.debug("Persisting session with id: " + session.getId());
+      session.access();
+      session.endAccess();
 
       if (manager instanceof StoreManager) {
         StoreManager storeManager = (StoreManager) manager;

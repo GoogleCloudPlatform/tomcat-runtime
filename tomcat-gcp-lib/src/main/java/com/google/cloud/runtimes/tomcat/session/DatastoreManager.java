@@ -23,6 +23,7 @@ import org.apache.catalina.Session;
 import org.apache.catalina.Store;
 import org.apache.catalina.StoreManager;
 import org.apache.catalina.session.ManagerBase;
+import org.apache.catalina.session.StoreBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
@@ -197,6 +198,14 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
     }
 
     setState(LifecycleState.STOPPING);
+  }
+
+  @Override
+  public void processExpires() {
+    log.debug("Processing expired sessions");
+    if (store instanceof StoreBase) {
+      ((StoreBase) store).processExpires();
+    }
   }
 
   public Store getStore() {

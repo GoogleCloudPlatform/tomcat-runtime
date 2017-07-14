@@ -25,6 +25,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.Streams;
 
 import org.apache.catalina.LifecycleException;
@@ -67,6 +68,12 @@ public class DatastoreStore extends StoreBase {
    * Namespace to use in the Datastore.
    */
   private String namespace;
+
+  /**
+   * Defines the maximum time a session can be inactive before being deleted by the
+   * expiration process.
+   */
+  private long sessionMaxInactiveTime;
 
   /**
    * {@inheritDoc}
@@ -213,9 +220,23 @@ public class DatastoreStore extends StoreBase {
 
     Entity sessionEntity = Entity.newBuilder(keyFactory.newKey(session.getId()))
         .set("content", Blob.copyFrom(bos.toByteArray()))
+        .set("lastAccess", session.getLastAccessedTime())
         .build();
 
     datastore.put(sessionEntity);
+  }
+
+  @Override
+  public void processExpires() {
+    log.debug("Processing expired session");
+    long limit = System.currentTimeMillis() - sessionMaxInactiveTime * 1000;
+
+    Query<Key> query = keyQueryBuilder
+        .setFilter(PropertyFilter.le("lastAccess", limit))
+        .build();
+
+    QueryResults<Key> keys = datastore.run(query);
+    datastore.delete(Streams.stream(keys).toArray(Key[]::new));
   }
 
   /**
@@ -232,6 +253,13 @@ public class DatastoreStore extends StoreBase {
    */
   public void setSessionKind(String sessionKind) {
     this.sessionKind = sessionKind;
+  }
+
+  /**
+   * This property will be injected by Tomcat on startup.
+   */
+  public void setSessionMaxInactiveTime(long sessionMaxInactiveTime) {
+    this.sessionMaxInactiveTime = sessionMaxInactiveTime;
   }
 
 }

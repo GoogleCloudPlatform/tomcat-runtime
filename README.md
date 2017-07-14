@@ -58,8 +58,9 @@ The distributed sessions module can be configured through the environment variab
 
 |  Property | Description  | Default  | 
 |---|---|---|
-| session.DatastoreStore.namespace    |  Namespace to use in the Datastore                         |  tomcat-gcp-persistent-session |
-| session.DatastoreStore.sessionKind  |  Name of the entity used to store sessions in the Datastore |  TomcatGCloudSession |
+| session.DatastoreStore.namespace    |  Namespace to use in the Datastore.                         |  tomcat-gcp-persistent-session |
+| session.DatastoreStore.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
+| session.DatastoreStore.sessionMaxInactiveTime |  Defines the maximum time a session can be inactive before being deleted by the expiration process. | 3600 |
 
 ## Running outside of Google Cloud
 If you are using the runtime outside of Google Cloud you want to make sure that you have access to
