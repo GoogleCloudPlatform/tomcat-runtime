@@ -19,7 +19,7 @@
 -->
 <!DOCTYPE server-xml [
     <!ENTITY gcp-configuration SYSTEM "gcp.xml">
-    <!ENTITY distributed-session-configuration SYSTEM "distributed-session.xml">
+    <!ENTITY distributed-session-configuration SYSTEM "distributed-sessions.xml">
     ]>
 <Context>
   &gcp-configuration;
