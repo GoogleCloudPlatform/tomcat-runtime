@@ -30,7 +30,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 
 /**
- * This valve use the Store Manager to persist the session after each request.
+ * This valve uses the Store Manager to persist the session after each request.
  */
 public class DatastoreValve extends ValveBase {
 
@@ -39,7 +39,7 @@ public class DatastoreValve extends ValveBase {
   /**
    * {@inheritDoc}
    *
-   * <p>If the manager contain a store use it to persist the session at the end of the request.</p>
+   * <p>If the manager contain a store, use it to persist the session at the end of the request.</p>
    */
   @Override
   public void invoke(Request request, Response response) throws IOException, ServletException {

@@ -33,8 +33,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Implementation of the {@code org.apache.catalina.Manager} interface which uses the
- * Google Datastore to replicate sessions.
+ * Implementation of the {@code org.apache.catalina.Manager} interface which uses
+ * Google Datastore to share sessions across nodes.
  *
  * <p>This manager should be used in conjunction with {@link DatastoreValve} and can be used
  * with {@link DatastoreStore}.<br/>
@@ -49,14 +49,14 @@ import java.util.Set;
  *   }
  * </pre>
  *
- * <p>The session is never stored locally and always fetched from the datastore.</p>
+ * <p>The sessions is never stored locally and is always fetched from the Datastore.</p>
  */
 public class DatastoreManager extends ManagerBase implements StoreManager {
 
   private static final Log log = LogFactory.getLog(DatastoreManager.class);
 
   /**
-   * The store will be in charge of all the interaction with the Datastore.
+   * The store will be in charge of all the interactions with the Datastore.
    */
   protected Store store = null;
 
@@ -65,7 +65,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
    *
    * <p>Ensure that a store is present and initialized.</p>
    *
-   * @throws LifecycleException If an error occur during the store initialisation
+   * @throws LifecycleException If an error occurs during the store initialization
    */
   @Override
   protected synchronized void startInternal() throws LifecycleException {
@@ -151,7 +151,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * Returns the number of session present in the Store.
+   * Returns the number of sessions present in the Store.
    *
    * <p>Note: Aggregation can be slow on the Datastore, cache the result if possible</p>
    *
@@ -170,7 +170,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   }
 
   /**
-   * Returns a set of all sessions IDs or null if an error occur.
+   * Returns a set of all sessions IDs or null if an error occurs.
    *
    * <p>Note: Listing all the keys can be slow on the Datastore.</p>
    *
@@ -215,7 +215,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   /**
    * The store will be injected by Tomcat on startup.
    *
-   * <p>See distributed-session.xml for the configuration.</p>
+   * <p>See distributed-sessions.xml for the configuration.</p>
    */
   public void setStore(Store store) {
     this.store = store;

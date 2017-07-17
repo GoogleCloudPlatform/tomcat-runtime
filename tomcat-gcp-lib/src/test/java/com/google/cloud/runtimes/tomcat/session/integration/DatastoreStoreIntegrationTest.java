@@ -51,7 +51,7 @@ import org.junit.Test;
  * {@link org.apache.catalina.Store} interface and verify the behavior of
  * the serialization mechanisms.
  *
- * If no credentials can be found for the Datastore those tests are ignored.
+ * If no credentials can be found for the Datastore, those tests are ignored.
  */
 public class DatastoreStoreIntegrationTest {
 

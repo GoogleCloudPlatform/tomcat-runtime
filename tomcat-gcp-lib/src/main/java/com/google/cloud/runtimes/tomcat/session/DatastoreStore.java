@@ -43,12 +43,12 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 
 /**
- * This store interact with the Datastore service to persist sessions.
+ * This store interacts with the Datastore service to persist sessions.
  *
  * <p>It does not make any assumptions about the manager, so it could be used
  * by all manager implementations.</p>
  *
- * <p>However aggregations can be slow on the Datastore so if performance is a concern prefer using
+ * <p>However, aggregations can be slow on the Datastore. So, if performance is a concern, prefer using
  * a manager implementation which is not using aggregations such as {@link DatastoreManager}</p>
  */
 public class DatastoreStore extends StoreBase {
@@ -70,7 +70,7 @@ public class DatastoreStore extends StoreBase {
   private String namespace;
 
   /**
-   * Defines the maximum time a session can be inactive before being deleted by the
+   * Defines the maximum amount of time (in seconds) that a session can be inactive before being deleted by the
    * expiration process.
    */
   private long sessionMaxInactiveTime;
@@ -95,11 +95,11 @@ public class DatastoreStore extends StoreBase {
   /**
    * Return the number of Sessions present in this Store.
    *
-   * <p>The Datastore does not support counting element in a collection
-   * so all the keys are fetched and the count is computed locally.</p>
+   * <p>The Datastore does not support counting elements in a collection.
+   * So, all keys are fetched and the counted locally.</p>
    *
    * <p>This method may be slow if a large number of sessions are persisted,
-   * prefer operations on individual entity rather than aggregations.</p>
+   * prefer operations on individual entities rather than aggregations.</p>
    *
    * @return The number of sessions stored into the Datastore
    */
@@ -113,13 +113,13 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * Return an array containing the session identifiers of all Sessions currently saved in this
+   * Returns an array containing the session identifiers of all Sessions currently saved in this
    * Store. If there are no such Sessions, a zero-length array is returned.
    *
-   * <p>This operation may be slow if a large number of sessions are persisted.
-   * Note that the number of key returned may be bounded by the Datastore configuration.</p>
+   * <p>This operation may be slow if a large number of sessions is persisted.
+   * Note that the number of keys returned may be bounded by the Datastore configuration.</p>
    *
-   * @return The ids of all the persisted sessions
+   * @return The ids of all persisted sessions
    */
   @Override
   public String[] keys() throws IOException {
@@ -142,7 +142,7 @@ public class DatastoreStore extends StoreBase {
    * Load and return the Session associated with the specified session identifier from this Store,
    * without removing it. If there is no such stored Session, return null.
    *
-   * <p>Look in the datastore for a serialized session and attempt to deserialize it.</p>
+   * <p>Look in the Datastore for a serialized session and attempt to deserialize it.</p>
    *
    * <p>If the session is successfully deserialized, it is added to the current manager and is
    * returned by this method. Otherwise null is returned </p>
@@ -172,7 +172,7 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * Remove the Session with the specified session identifier from this Store, if present.
+   * Remove the Session with the specified session identifier from this Store.
    * If no such Session is present, this method takes no action.
    *
    * @param id Session identifier of the session to remove
@@ -200,7 +200,7 @@ public class DatastoreStore extends StoreBase {
    *
    * <p>Attempt to serialize the session and send it to the datastore.</p>
    *
-   * @throws IOException If an error occur during the serialization of the session.
+   * @throws IOException If an error occurs during the serialization of the session.
    *
    * @param session Session to be saved
    */
@@ -228,7 +228,7 @@ public class DatastoreStore extends StoreBase {
 
   @Override
   public void processExpires() {
-    log.debug("Processing expired session");
+    log.debug("Processing expired sessions");
     long limit = System.currentTimeMillis() - sessionMaxInactiveTime * 1000;
 
     Query<Key> query = keyQueryBuilder

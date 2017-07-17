@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * This servlet demonstrate the usage of distributed session by adding session parameters and
+ * This servlet demonstrates the usage of distributed sessions by adding session parameters and
  * modifying their values at each requests.
  */
 @WebServlet(urlPatterns = {"/session"})
