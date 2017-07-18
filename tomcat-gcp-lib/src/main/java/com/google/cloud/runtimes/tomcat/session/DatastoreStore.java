@@ -49,8 +49,9 @@ import java.util.Arrays;
  * <p>It does not make any assumptions about the manager, so it could be used
  * by all manager implementations.</p>
  *
- * <p>However, aggregations can be slow on the Datastore. So, if performance is a concern, prefer using
- * a manager implementation which is not using aggregations such as {@link DatastoreManager}</p>
+ * <p>However, aggregations can be slow on the Datastore. So, if performance is a concern, prefer
+ * using a manager implementation which is not using aggregations such as
+ * {@link DatastoreManager}</p>
  */
 public class DatastoreStore extends StoreBase {
 
@@ -71,8 +72,8 @@ public class DatastoreStore extends StoreBase {
   private String namespace;
 
   /**
-   * Defines the maximum amount of time (in seconds) that a session can be inactive before being deleted by the
-   * expiration process.
+   * Defines the maximum amount of time (in seconds) that a session can be inactive before being
+   * deleted by the expiration process.
    */
   private long sessionMaxInactiveTime;
 
