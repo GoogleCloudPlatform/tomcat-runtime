@@ -25,6 +25,7 @@ import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.Streams;
 
@@ -57,7 +58,7 @@ public class DatastoreStore extends StoreBase {
 
   private Datastore datastore = null;
   private KeyFactory keyFactory = null;
-  private KeyQuery.Builder keyQueryBuilder = null;
+  private StructuredQuery.Builder<Key> keyQueryBuilder = null;
 
   /**
    * Name of the kind used in The Datastore for the session.
