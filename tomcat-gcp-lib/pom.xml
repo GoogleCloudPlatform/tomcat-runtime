@@ -104,9 +104,8 @@
         <plugins>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
+            <artifactId>maven-failsafe-plugin</artifactId>
             <version>2.20</version>
-            <configuration combine.self="override" />
           </plugin>
         </plugins>
       </build>
