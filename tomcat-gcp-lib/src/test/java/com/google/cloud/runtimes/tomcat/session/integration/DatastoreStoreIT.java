@@ -53,7 +53,7 @@ import org.junit.Test;
  *
  * If no credentials can be found for the Datastore, those tests are ignored.
  */
-public class DatastoreStoreIntegrationTest {
+public class DatastoreStoreIT {
 
   private static DatastoreStore store;
   private static Datastore datastore;
