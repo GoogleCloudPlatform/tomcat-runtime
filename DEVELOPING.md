@@ -14,7 +14,27 @@ newly created image as a base in your Dockerfile.
 
 ## Testing the image
 
-### Structure tests
+### JUnit Units tests
+
+You can quickly tests the project locally using the JUnit tests, to do so run:
+```bash
+mvn clean test
+```
+
+### JUnit GCP Integration tests
+
+This tests the interaction of the different components with the GCP Services. 
+The tests are run outside of a Docker container. 
+
+In order to run the tests you need to install the [Cloud SDK](https://cloud.google.com/sdk/docs/)
+and select an active project with `gcloud init`.
+
+You can run these tests with maven using the profile `gcp-integration-test`, for example:
+```bash
+mvn clean verify -P gcp-integration-test
+```
+
+### Runtimes common Structure tests
 
 Specification: [Runtime common - Structure tests](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/structure_tests)
 
@@ -23,7 +43,7 @@ These tests inspect the content of the Docker image to ensure the presence of sp
 They are automatically run when the image is built with Maven. 
 You can find the details of the tests in [structure.yaml](tomcat/src/test/resources/structure.yaml)
 
-### Integration tests
+### Runtimes common Integration tests
 
 Specification: [Runtimes common - Integration tests](https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests)
 

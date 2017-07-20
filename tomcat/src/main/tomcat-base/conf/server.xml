@@ -17,7 +17,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-<!DOCTYPE server-xml [<!ENTITY gcp-configuration SYSTEM "gcp.xml">]>
 <Server port="-1">
   <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
   <!-- The security listener enforce the user to be non root.
@@ -48,8 +47,6 @@
 
       <Host name="localhost"  appBase="webapps"
           unpackWARs="true" autoDeploy="true">
-
-        &gcp-configuration;
 
       </Host>
     </Engine>

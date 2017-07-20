@@ -22,9 +22,13 @@ runtime: custom
 env: flex
 ```
 
+## Configuration
+The Tomcat instance can be configured through the environment variable `TOMCAT_PROPERTIES` which is
+a comma-separated list of `name=value` pairs appended to `catalina.properties`.
+
 # Security best practices
 
-## Execute tomcat with a non root user
+## Execute tomcat with a non-root user
 For security purposes it is recommended to start the Tomcat instance using the `tomcat` user. 
 
 You can do so by adding `USER tomcat` at the end of your Dockerfile.
@@ -37,7 +41,32 @@ RUN chown tomcat:tomcat $CATALINA_BASE/webapps/ROOT.war
 USER tomcat
 ```
 
-## Development Guide
+# Distributed sessions
+This image can be configured to store Tomcat sessions in the [Google Cloud Datastore](https://cloud.google.com/datastore/docs) which allows
+multiple instances of Tomcat to share sessions.
+
+You can enable this feature by adding `distributed-sessions` to the list of enabled modules.
+For example on Google App Engine:
+ 
+```yaml
+env_variables:
+  TOMCAT_MODULES_ENABLE: distributed-sessions
+```
+
+## Configuration
+The distributed sessions module can be configured through the environment variable `TOMCAT_PROPERTIES`.
+
+|  Property | Description  | Default  | 
+|---|---|---|
+| session.DatastoreStore.namespace    |  Namespace to use in the Datastore.                         |  tomcat-gcp-persistent-session |
+| session.DatastoreStore.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
+| session.DatastoreStore.sessionMaxInactiveTime |  Defines the maximum time (in seconds) a session can be inactive before being deleted by the expiration process. | 3600 |
+
+## Running outside of Google Cloud
+If you are using the runtime outside of Google Cloud, you will want to make sure that your application has access to
+the Datastore. In this case, check out the [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials) guide.
+
+# Development Guide
 
 * See [instructions](DEVELOPING.md) on how to build and test this image.
 
@@ -45,6 +74,6 @@ USER tomcat
 
 * See [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## Licensing
+# Licensing
 
 * See [LICENSE](LICENSE)
