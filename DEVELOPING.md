@@ -18,20 +18,20 @@ newly created image as a base in your Dockerfile.
 
 You can quickly tests the project locally using the JUnit tests, to do so run:
 ```bash
-mvn clean verify
+mvn clean test
 ```
 
-### JUnit GCloud Integration tests
+### JUnit GCP Integration tests
 
-This tests the interaction of the different components with the GCloud Services. 
+This tests the interaction of the different components with the GCP Services. 
 The tests are run outside of a Docker container. 
 
 In order to run the tests you need to install the [Cloud SDK](https://cloud.google.com/sdk/docs/)
 and select an active project with `gcloud init`.
 
-You can run these tests with maven using the profile `gcloud-integration-test`, for example:
+You can run these tests with maven using the profile `gcp-integration-test`, for example:
 ```bash
-mvn clean verify -P gcloud-integration-test
+mvn clean verify -P gcp-integration-test
 ```
 
 ### Runtimes common Structure tests
