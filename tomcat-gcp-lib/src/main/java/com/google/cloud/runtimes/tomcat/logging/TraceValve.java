@@ -46,7 +46,7 @@ public class TraceValve extends ValveBase {
 
   private static final Log log = LogFactory.getLog(TraceValve.class);
 
-  private TraceService traceService = null;
+  private TraceService traceService;
 
   /**
    * Delay in second before the trace scheduler send the traces (allow buffering or traces).

@@ -9,7 +9,7 @@ manual_scaling:
   instances: 1
 
 env_variables:
-  TOMCAT_MODULES_ENABLE: trace-requests
+  TOMCAT_MODULES_ENABLE: stackdriver-trace
 
 handlers:
 - url: /.*

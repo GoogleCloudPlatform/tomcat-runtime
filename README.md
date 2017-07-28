@@ -69,11 +69,11 @@ the Datastore. In this case, check out the [Google Cloud Authentication](https:/
 # Stackdriver Trace
 The trace module sends information about requests (such as latency) to the [Stackdriver Trace service](https://cloud.google.com/trace/docs/).
 
-To enable this module add `trace-requests` to the list of enabled modules.
+To enable this module add `stackdriver-trace` to the list of enabled modules.
 
 ```yaml
 env_variables:
-  TOMCAT_MODULES_ENABLE: trace-requests
+  TOMCAT_MODULES_ENABLE: stackdriver-trace
 ```
 
 ## Configuration
@@ -81,7 +81,7 @@ The following configuration is available through the the environment variable `T
 
 |  Property | Description  | Default  |
 |---|---|---|
-| gcp.trace-requests.scheduledDelay | The traces are grouped before being sent to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
+| gcp.stackdriver-trace.scheduledDelay | The traces are grouped before being sent to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
 | gcp.project  |  Name of the project in which the traces will be stored. |  `$GCLOUD_PROJECT` |
 
 ## Usage outside of Google Cloud Platform
