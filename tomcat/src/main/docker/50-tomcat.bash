@@ -6,7 +6,7 @@ if [ "$PLATFORM" == "gae" ]; then
 fi
 
 if [ -n "$GCLOUD_PROJECT" ]; then
-  TOMCAT_PROPERTIES="com.gcp.project=${GCLOUD_PROJECT},${TOMCAT_PROPERTIES}"
+  TOMCAT_PROPERTIES="gcp.project=${GCLOUD_PROJECT},${TOMCAT_PROPERTIES}"
 fi
 
 if [ -n "$TOMCAT_MODULES_ENABLE" ]; then

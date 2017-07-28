@@ -81,8 +81,8 @@ The following configuration is available through the the environment variable `T
 
 |  Property | Description  | Default  |
 |---|---|---|
-| trace.TraceValve.traceDelay | The traces are grouped before being send to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
-| com.gcp.project  |  Name of the project in which the traces stored. |  `$GCLOUD_PROJECT` |
+| gcp.trace-requests.scheduledDelay | The traces are grouped before being sent to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
+| gcp.project  |  Name of the project in which the traces stored. |  `$GCLOUD_PROJECT` |
 
 ## Usage outside of Google Cloud Platform
 When you are using this module outside of GCP you need to provide credentials through [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials)

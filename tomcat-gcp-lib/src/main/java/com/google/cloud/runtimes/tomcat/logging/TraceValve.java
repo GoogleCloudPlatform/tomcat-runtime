@@ -67,6 +67,14 @@ public class TraceValve extends ValveBase {
   protected void initInternal() throws LifecycleException {
     super.initInternal();
 
+    if (traceDelay == 0) {
+      throw new LifecycleException("The delay for trace must be greater than 0");
+    }
+
+    if (projectId.isEmpty()) {
+      throw new LifecycleException("You must specify a project to store the traces");
+    }
+
     try {
       traceService = TraceGrpcApiService.builder()
           .setScheduledDelay(traceDelay)
