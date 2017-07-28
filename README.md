@@ -62,9 +62,31 @@ The distributed sessions module can be configured through the environment variab
 | session.DatastoreStore.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
 | session.DatastoreStore.sessionMaxInactiveTime |  Defines the maximum time (in seconds) a session can be inactive before being deleted by the expiration process. | 3600 |
 
-## Running outside of Google Cloud
-If you are using the runtime outside of Google Cloud, you will want to make sure that your application has access to
+## Usage outside of Google Cloud Platform
+If you are using the runtime outside of GCP, you will want to make sure that your application has access to
 the Datastore. In this case, check out the [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials) guide.
+
+# Stackdriver Trace
+The trace module sends information about requests (such as latency) to the Stackdriver Trace service.
+
+To enable this module add `trace-requests` to the list of enabled modules.
+
+```yaml
+env_variables:
+  TOMCAT_MODULES_ENABLE: trace-requests
+```
+
+## Configuration
+The following configuration is available through the the environment variable `TOMCAT_PROPERTIES`.
+
+|  Property | Description  | Default  |
+|---|---|---|
+| trace.TraceValve.traceDelay | The traces are grouped before being send to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
+| com.gcp.project  |  Name of the project in which the traces stored. |  `$GCLOUD_PROJECT` |
+
+## Usage outside of Google Cloud Platform
+When you are using this module outside of GCP you need to provide credentials through [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials)
+and to indicate a project name through the property `com.gcp.project` or the environment variable `$GCLOUD_PROJECT`.
 
 # Development Guide
 
