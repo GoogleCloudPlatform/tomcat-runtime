@@ -82,7 +82,7 @@ public class TraceValve extends ValveBase {
           .build();
 
       Trace.init(traceService);
-      log.trace("Trace service initialized for project: " + projectId);
+      log.info("Trace service initialized for project: " + projectId);
     } catch (IOException e) {
       log.error("An error occurred during the initialization of the Trace valve", e);
       throw new LifecycleException(e);
@@ -104,7 +104,7 @@ public class TraceValve extends ValveBase {
           .getSpanContextFactory()
           .fromHeader(traceHeader);
       traceService.getSpanContextHandler().attach(spanContext);
-      log.trace("Tracing request with header: " + request.getHeader(X_CLOUD_TRACE_HEADER));
+      log.debug("Tracing request with header: " + request.getHeader(X_CLOUD_TRACE_HEADER));
     });
 
     TraceContext context = tracer.startSpan(request.getRequestURI());
