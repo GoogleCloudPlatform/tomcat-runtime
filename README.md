@@ -67,7 +67,7 @@ If you are using the runtime outside of GCP, you will want to make sure that you
 the Datastore. In this case, check out the [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials) guide.
 
 # Stackdriver Trace
-The trace module sends information about requests (such as latency) to the Stackdriver Trace service.
+The trace module sends information about requests (such as latency) to the [Stackdriver Trace service](https://cloud.google.com/trace/docs/).
 
 To enable this module add `trace-requests` to the list of enabled modules.
 
@@ -82,11 +82,11 @@ The following configuration is available through the the environment variable `T
 |  Property | Description  | Default  |
 |---|---|---|
 | gcp.trace-requests.scheduledDelay | The traces are grouped before being sent to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
-| gcp.project  |  Name of the project in which the traces stored. |  `$GCLOUD_PROJECT` |
+| gcp.project  |  Name of the project in which the traces will be stored. |  `$GCLOUD_PROJECT` |
 
 ## Usage outside of Google Cloud Platform
 When you are using this module outside of GCP you need to provide credentials through [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials)
-and to indicate a project name through the property `com.gcp.project` or the environment variable `$GCLOUD_PROJECT`.
+and indicate a project name through the property `com.gcp.project` or the environment variable `$GCLOUD_PROJECT`.
 
 # Development Guide
 
