@@ -5,6 +5,10 @@ if [ "$PLATFORM" == "gae" ]; then
   TOMCAT_MODULES_ENABLE="$TOMCAT_MODULES_ENABLE,gcp"
 fi
 
+if [ -n "$GCLOUD_PROJECT" ]; then
+  TOMCAT_PROPERTIES="com.gcp.project=${GCLOUD_PROJECT},${TOMCAT_PROPERTIES}"
+fi
+
 if [ -n "$TOMCAT_MODULES_ENABLE" ]; then
   echo "$TOMCAT_MODULES_ENABLE" | tr ',' '\n' | while read module; do
     if [ -r "/config/${module}.xml" ]; then

@@ -20,9 +20,14 @@
 <!DOCTYPE server-xml [
     <!ENTITY gcp-configuration SYSTEM "gcp.xml">
     <!ENTITY distributed-session-configuration SYSTEM "distributed-sessions.xml">
+    <!ENTITY trace-requests SYSTEM "trace-requests.xml">
     ]>
 <Context>
+
+  &trace-requests;
+
   &gcp-configuration;
 
   &distributed-session-configuration;
+
 </Context>

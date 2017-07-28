@@ -1,0 +1,3 @@
+<Valve className="com.google.cloud.runtimes.tomcat.logging.TraceValve"
+    projectId="${com.gcp.project}"
+    traceDelay="${trace.TraceValve.traceDelay}"/>
