@@ -22,8 +22,8 @@ import com.google.cloud.trace.core.SpanContext;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceGrpcApiService;
 import com.google.cloud.trace.service.TraceService;
-
 import com.google.common.annotations.VisibleForTesting;
+
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -72,19 +72,23 @@ public class TraceValve extends ValveBase {
   @VisibleForTesting
   void initTraceService() throws LifecycleException {
 
-    if (traceDelay == 0) {
+    if (traceDelay != null && traceDelay <= 0) {
       throw new LifecycleException("The delay for trace must be greater than 0");
     }
 
-    if (projectId.isEmpty()) {
+    if (projectId == null || projectId.isEmpty()) {
       throw new LifecycleException("You must specify a project to store the traces");
     }
 
     try {
-      traceService = TraceGrpcApiService.builder()
-          .setScheduledDelay(traceDelay)
-          .setProjectId(projectId)
-          .build();
+      TraceGrpcApiService.Builder traceServiceBuilder = TraceGrpcApiService.builder()
+          .setProjectId(projectId);
+
+      if (traceDelay != null) {
+        traceServiceBuilder.setScheduledDelay(traceDelay);
+      }
+
+      traceService = traceServiceBuilder.build();
 
       Trace.init(traceService);
       log.info("Trace service initialized for project: " + projectId);
