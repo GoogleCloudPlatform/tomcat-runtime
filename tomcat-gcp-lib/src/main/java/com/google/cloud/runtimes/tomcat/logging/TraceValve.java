@@ -23,6 +23,7 @@ import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceGrpcApiService;
 import com.google.cloud.trace.service.TraceService;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -31,7 +32,6 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 import java.io.IOException;
-import java.util.Optional;
 import javax.servlet.ServletException;
 
 /**
@@ -49,7 +49,7 @@ public class TraceValve extends ValveBase {
   private TraceService traceService;
 
   /**
-   * Delay in second before the trace scheduler send the traces (allow buffering or traces).
+   * Delay in second before the trace scheduler send the traces (allow buffering of traces).
    */
   private Integer traceDelay;
 
@@ -66,6 +66,11 @@ public class TraceValve extends ValveBase {
   @Override
   protected void initInternal() throws LifecycleException {
     super.initInternal();
+    initTraceService();
+  }
+
+  @VisibleForTesting
+  void initTraceService() throws LifecycleException {
 
     if (traceDelay == 0) {
       throw new LifecycleException("The delay for trace must be greater than 0");
@@ -99,13 +104,14 @@ public class TraceValve extends ValveBase {
   public void invoke(Request request, Response response) throws IOException, ServletException {
     Tracer tracer = traceService.getTracer();
 
-    Optional.ofNullable(request.getHeader(X_CLOUD_TRACE_HEADER)).ifPresent(traceHeader -> {
+    String traceHeader = request.getHeader(X_CLOUD_TRACE_HEADER);
+    if (traceHeader != null) {
       SpanContext spanContext = traceService
           .getSpanContextFactory()
           .fromHeader(traceHeader);
       traceService.getSpanContextHandler().attach(spanContext);
       log.debug("Tracing request with header: " + request.getHeader(X_CLOUD_TRACE_HEADER));
-    });
+    }
 
     TraceContext context = tracer.startSpan(request.getRequestURI());
 
@@ -126,5 +132,9 @@ public class TraceValve extends ValveBase {
    */
   public void setTraceDelay(Integer traceDelay) {
     this.traceDelay = traceDelay;
+  }
+
+  public void setTraceService(TraceService traceService) {
+    this.traceService = traceService;
   }
 }

@@ -4,26 +4,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.trace.SpanContextHandler;
 import com.google.cloud.trace.Tracer;
-import com.google.cloud.trace.core.ConstantTraceOptionsFactory;
 import com.google.cloud.trace.core.SpanContext;
 import com.google.cloud.trace.core.SpanContextFactory;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceService;
-import com.google.devtools.cloudtrace.v1.TraceSpan;
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
-import org.apache.tomcat.util.descriptor.web.ContextHandler;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -53,14 +49,15 @@ public class TraceValveTest {
   @Mock
   private SpanContextFactory spanContextFactory;
 
-  @InjectMocks
   private TraceValve valve;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
+    valve = new TraceValve();
     valve.setNext(nextValve);
+    valve.setTraceService(traceService);
 
     when(traceService.getTracer()).thenReturn(tracer);
     when(traceService.getSpanContextFactory()).thenReturn(spanContextFactory);
@@ -96,6 +93,19 @@ public class TraceValveTest {
     valve.invoke(request, response);
 
     verify(spanContextHandler).attach(contextFromHeader);
+  }
+
+  @Test(expected = LifecycleException.class)
+  public void testInvalidTraceDelay() throws Exception {
+    valve.setTraceDelay(0);
+    valve.initTraceService();
+  }
+
+  @Test(expected = LifecycleException.class)
+  public void testInvalidProject() throws Exception {
+    valve.setTraceDelay(15);
+    valve.setProjectId("");
+    valve.initTraceService();
   }
 
 }
