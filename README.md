@@ -82,11 +82,9 @@ The following configuration is available through the the environment variable `T
 |  Property | Description  | Default  |
 |---|---|---|
 | gcp.stackdriver-trace.scheduledDelay | The traces are grouped before being sent to the Stackdriver service, this is the maximum time in seconds a trace can be buffered| 15 |
-| gcp.project  |  Name of the project in which the traces will be stored. |  `$GCLOUD_PROJECT` |
 
 ## Usage outside of Google Cloud Platform
-When you are using this module outside of GCP you need to provide credentials through [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials)
-and indicate a project name through the property `com.gcp.project` or the environment variable `$GCLOUD_PROJECT`.
+When you are using this module outside of GCP you need to provide credentials through [Google Cloud Authentication](https://developers.google.com/identity/protocols/application-default-credentials).
 
 # Development Guide
 

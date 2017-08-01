@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.google.cloud.runtimes.tomcat.logging;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -86,7 +101,7 @@ public class TraceValveTest {
   @Test
   public void testTraceHeader() throws Exception {
     SpanContext contextFromHeader = mock(SpanContext.class);
-    when(request.getHeader("x-cloud-trace-context")).thenReturn("traceid/spanid");
+    when(request.getHeader(SpanContextFactory.headerKey())).thenReturn("traceid/spanid");
     when(spanContextFactory.fromHeader("traceid/spanid")).thenReturn(contextFromHeader);
 
     valve.invoke(request, response);
@@ -97,13 +112,6 @@ public class TraceValveTest {
   @Test(expected = LifecycleException.class)
   public void testInvalidTraceDelay() throws Exception {
     valve.setTraceScheduledDelay(0);
-    valve.initTraceService();
-  }
-
-  @Test(expected = LifecycleException.class)
-  public void testInvalidProject() throws Exception {
-    valve.setTraceScheduledDelay(15);
-    valve.setProjectId("");
     valve.initTraceService();
   }
 

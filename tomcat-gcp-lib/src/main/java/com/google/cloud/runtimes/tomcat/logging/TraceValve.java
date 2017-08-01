@@ -16,9 +16,11 @@
 
 package com.google.cloud.runtimes.tomcat.logging;
 
+import com.google.cloud.ServiceOptions;
 import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.SpanContext;
+import com.google.cloud.trace.core.SpanContextFactory;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceGrpcApiService;
 import com.google.cloud.trace.service.TraceService;
@@ -42,7 +44,7 @@ public class TraceValve extends ValveBase {
   /**
    * Header used by GCP to stores the trace id and the span id.
    */
-  private static final String X_CLOUD_TRACE_HEADER = "x-cloud-trace-context";
+  private static final String X_CLOUD_TRACE_HEADER = SpanContextFactory.headerKey();
 
   private static final Log log = LogFactory.getLog(TraceValve.class);
 
@@ -52,11 +54,6 @@ public class TraceValve extends ValveBase {
    * Delay in second before the trace scheduler send the traces (allow buffering of traces).
    */
   private Integer traceScheduledDelay;
-
-  /**
-   * Identifier of the project to use when sending traces.
-   */
-  private String projectId;
 
   /**
    * {@inheritDoc}
@@ -76,11 +73,8 @@ public class TraceValve extends ValveBase {
       throw new LifecycleException("The delay for trace must be greater than 0");
     }
 
-    if (projectId == null || projectId.isEmpty()) {
-      throw new LifecycleException("You must specify a project to store the traces");
-    }
-
     try {
+      String projectId = ServiceOptions.getDefaultProjectId();
       TraceGrpcApiService.Builder traceServiceBuilder = TraceGrpcApiService.builder()
           .setProjectId(projectId);
 
@@ -122,13 +116,6 @@ public class TraceValve extends ValveBase {
     getNext().invoke(request, response);
 
     tracer.endSpan(context);
-  }
-
-  /**
-   * This property will be injected by Tomcat on startup.
-   */
-  public void setProjectId(String projectId) {
-    this.projectId = projectId;
   }
 
   /**
