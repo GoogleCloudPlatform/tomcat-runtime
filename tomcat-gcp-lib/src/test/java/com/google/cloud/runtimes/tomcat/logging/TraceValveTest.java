@@ -18,7 +18,6 @@ import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -97,13 +96,13 @@ public class TraceValveTest {
 
   @Test(expected = LifecycleException.class)
   public void testInvalidTraceDelay() throws Exception {
-    valve.setTraceDelay(0);
+    valve.setTraceScheduledDelay(0);
     valve.initTraceService();
   }
 
   @Test(expected = LifecycleException.class)
   public void testInvalidProject() throws Exception {
-    valve.setTraceDelay(15);
+    valve.setTraceScheduledDelay(15);
     valve.setProjectId("");
     valve.initTraceService();
   }

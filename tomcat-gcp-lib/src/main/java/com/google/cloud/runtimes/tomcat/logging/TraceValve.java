@@ -51,7 +51,7 @@ public class TraceValve extends ValveBase {
   /**
    * Delay in second before the trace scheduler send the traces (allow buffering of traces).
    */
-  private Integer traceDelay;
+  private Integer traceScheduledDelay;
 
   /**
    * Identifier of the project to use when sending traces.
@@ -72,7 +72,7 @@ public class TraceValve extends ValveBase {
   @VisibleForTesting
   void initTraceService() throws LifecycleException {
 
-    if (traceDelay != null && traceDelay <= 0) {
+    if (traceScheduledDelay != null && traceScheduledDelay <= 0) {
       throw new LifecycleException("The delay for trace must be greater than 0");
     }
 
@@ -84,8 +84,8 @@ public class TraceValve extends ValveBase {
       TraceGrpcApiService.Builder traceServiceBuilder = TraceGrpcApiService.builder()
           .setProjectId(projectId);
 
-      if (traceDelay != null) {
-        traceServiceBuilder.setScheduledDelay(traceDelay);
+      if (traceScheduledDelay != null) {
+        traceServiceBuilder.setScheduledDelay(traceScheduledDelay);
       }
 
       traceService = traceServiceBuilder.build();
@@ -134,8 +134,8 @@ public class TraceValve extends ValveBase {
   /**
    * This property will be injected by Tomcat on startup.
    */
-  public void setTraceDelay(Integer traceDelay) {
-    this.traceDelay = traceDelay;
+  public void setTraceScheduledDelay(Integer traceScheduledDelay) {
+    this.traceScheduledDelay = traceScheduledDelay;
   }
 
   public void setTraceService(TraceService traceService) {
