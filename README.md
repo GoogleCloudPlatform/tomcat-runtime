@@ -15,11 +15,33 @@ COPY your-application.war ROOT.war
 
 ## Running on App Engine Flexible
 
-Create a `Dockerfile` as described above and specify custom runtime in `app.yaml`.
+### Using the `gcloud beta app deploy` command
+
+Simply choose the Java runtime with Tomcat as the server preference in `app.yaml`.
+
+```yaml
+runtime: java
+env: flex
+runtime_config:
+  server: tomcat8
+```
+
+Then you can deploy using the `gcloud beta app deploy` [command](https://cloud.google.com/sdk/gcloud/reference/beta/app/deploy). Note that the "beta" command is currently required.
+
+### Using custom Dockerfile
+
+Specify a custom runtime in `app.yaml`.
 
 ```yaml
 runtime: custom
 env: flex
+```
+
+Then create a `Dockerfile` that uses the Tomcat runtime image.
+
+```dockerfile
+FROM gcr.io/google-appengine/tomcat
+COPY your-application.war ROOT.war
 ```
 
 ## Configuration
