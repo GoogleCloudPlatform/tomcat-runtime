@@ -8,6 +8,9 @@ health_check:
 manual_scaling:
   instances: 1
 
+env_variables:
+  TOMCAT_MODULES_ENABLE: stackdriver-trace
+
 handlers:
 - url: /.*
   script: ignored
