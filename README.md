@@ -69,7 +69,8 @@ USER tomcat
 This image can be configured to store Tomcat sessions in the [Google Cloud Datastore](https://cloud.google.com/datastore/docs) which allows
 multiple instances of Tomcat to share sessions.
 
-You can enable this feature by adding `distributed-sessions` to the list of enabled modules.
+You can enable this feature by adding `distributed-sessions` to the list of optional modules, which is specified in the `TOMCAT_MODULES_ENABLE` environment variable.
+
 For example on Google App Engine:
  
 ```yaml
