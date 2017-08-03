@@ -2,9 +2,6 @@ runtime: custom
 env: flex
 service: tomcat-runtime-integration
 
-health_check:
-  enable_health_check: False
-
 manual_scaling:
   instances: 1
 
