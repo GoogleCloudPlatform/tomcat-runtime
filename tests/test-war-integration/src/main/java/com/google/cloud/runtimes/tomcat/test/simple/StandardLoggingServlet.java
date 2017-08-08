@@ -37,6 +37,6 @@ public class StandardLoggingServlet extends HttpServlet {
 
     logger.log(Level.parse(level), token);
     resp.setContentType("text/plain");
-    resp.getWriter().println(URLEncoder.encode("java.log", "UTF-8"));
+    resp.getWriter().println(URLEncoder.encode("appengine.googleapis.com/stdout", "UTF-8"));
   }
 }
