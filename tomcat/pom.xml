@@ -251,7 +251,7 @@
               <goal>copy</goal>
             </goals>
             <configuration>
-              <outputDirectory>${project.build.directory}/docker-src/tomcat-base/lib/</outputDirectory>
+              <outputDirectory>${project.build.directory}/docker-src/tomcat-base/lib-gcp/</outputDirectory>
               <artifactItems>
                 <artifactItem>
                   <groupId>${project.groupId}</groupId>
