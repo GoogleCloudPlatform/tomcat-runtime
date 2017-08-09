@@ -47,8 +47,9 @@ public class StandardLoggingServlet extends HttpServlet {
     resp.getWriter().println(URLEncoder.encode("appengine.googleapis.com/stdout", "UTF-8"));
   }
 
-  private String convertStackdriverSeverityToLoggingLevel(String level) {
-    switch (level) {
+  private String convertStackdriverSeverityToLoggingLevel(String severity) {
+    String level;
+    switch (severity) {
       case "DEBUG":
         level = "FINE";
         break;
@@ -56,6 +57,9 @@ public class StandardLoggingServlet extends HttpServlet {
       case "CRITICAL":
       case "ALERT":
         level = "SEVERE";
+        break;
+      default:
+        level = severity;
     }
 
     return level;

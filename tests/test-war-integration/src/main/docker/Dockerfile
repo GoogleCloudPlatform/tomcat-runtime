@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 FROM ${test.docker.image}
-ADD ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
+COPY ${project.build.finalName}.war $CATALINA_BASE/webapps/ROOT.war
