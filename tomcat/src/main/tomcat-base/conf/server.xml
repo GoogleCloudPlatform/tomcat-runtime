@@ -57,7 +57,11 @@
 
         &gcp-configuration;
 
-        &distributed-session-configuration;
+        <Context path="/">
+
+            &distributed-session-configuration;
+
+        </Context>
 
       </Host>
     </Engine>
