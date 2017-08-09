@@ -50,7 +50,7 @@ The Tomcat instance can be configured through the environment variable `TOMCAT_P
 a comma-separated list of `name=value` pairs appended to `catalina.properties`.
 
 ### Stackdriver Logging
-When the Tomcat runtime is running on Google App Engine, all outputs to stdout/stderr are captured by Stackdriver 
+When the Tomcat runtime is running on Google App Engine, all output to stdout/stderr is captured by Stackdriver 
 and is available via the Stackdriver logging console.
  
 However more detailed and integrated logs are available if the Stackdriver logging mechanism is used directly.
