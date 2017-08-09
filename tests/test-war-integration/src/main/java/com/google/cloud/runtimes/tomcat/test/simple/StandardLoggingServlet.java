@@ -60,6 +60,7 @@ public class StandardLoggingServlet extends HttpServlet {
         break;
       default:
         level = severity;
+        break;
     }
 
     return level;
