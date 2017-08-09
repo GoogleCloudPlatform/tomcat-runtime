@@ -49,6 +49,19 @@ COPY your-application.war ROOT.war
 The Tomcat instance can be configured through the environment variable `TOMCAT_PROPERTIES` which is
 a comma-separated list of `name=value` pairs appended to `catalina.properties`.
 
+### Stackdriver Logging
+When the Tomcat runtime is running on Google App Engine, all outputs to stdout/stderr are captured by Stackdriver 
+and is available via the Stackdriver logging console.
+ 
+However more detailed and integrated logs are available if the Stackdriver logging mechanism is used directly.
+
+To take advantage of this integration, add the [Google Cloud Java Client for Logging](https://github.com/GoogleCloudPlatform/google-cloud-java/tree/master/google-cloud-logging) 
+to your dependencies and provide a `logging.properties` file as part of the resources of the application with the following content:
+ 
+```properties
+handlers=com.google.cloud.logging.LoggingHandler
+```
+
 ### Security best practices
 
 #### Execute tomcat with a non-root user
