@@ -79,12 +79,7 @@ public class DatastoreValve extends ValveBase {
    * @return Whether the URI should be ignored or not
    */
   private boolean isUriIgnored(String uri) {
-    boolean ignored = false;
-    if (ignoredUriPattern != null) {
-      ignored = Pattern.matches(ignoredUriPattern, uri);
-    }
-
-    return ignored;
+    return ignoredUriPattern != null && Pattern.matches(ignoredUriPattern, uri);
   }
 
   /**

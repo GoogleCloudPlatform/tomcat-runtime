@@ -85,7 +85,7 @@ The distributed sessions module can be configured through the environment variab
 | session.DatastoreStore.namespace    |  Namespace to use in the Datastore.                         |  tomcat-gcp-persistent-session |
 | session.DatastoreStore.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
 | session.DatastoreStore.sessionMaxInactiveTime |  Defines the maximum time (in seconds) a session can be inactive before being deleted by the expiration process. | 3600 |
-| session.DatastoreValve.ignoredUriPattern | [Pattern](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) specifying which Uri to ignore for session persistence | null |
+| session.DatastoreValve.ignoredUriPattern | [Pattern](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) specifying which Uri to ignore when persisting sessions. | null |
 
 #### Usage outside of Google Cloud Platform
 If you are using the runtime outside of GCP, you will want to make sure that your application has access to
