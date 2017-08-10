@@ -18,6 +18,7 @@ package com.google.cloud.runtimes.tomcat.session;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +49,15 @@ public class DatastoreValveTest {
   private Store store;
 
   @Mock
+  private Request request;
+
+  @Mock
+  private Response response;
+
+  @Mock
+  private Session session;
+
+  @Mock
   private Valve nextValve = mock(Valve.class);
 
   private DatastoreValve valve;
@@ -58,23 +68,51 @@ public class DatastoreValveTest {
 
     when(context.getManager()).thenReturn(manager);
     when(manager.getStore()).thenReturn(store);
+    when(request.getSessionInternal(anyBoolean())).thenReturn(session);
+    when(request.getContext()).thenReturn(context);
     valve = new DatastoreValve();
   }
 
   @Test
   public void testSessionPersistence() throws Exception {
-    Request request = mock(Request.class);
-    Response response = mock(Response.class);
-    Session session = mock(Session.class);
-
-    when(request.getSessionInternal(anyBoolean())).thenReturn(session);
-    when(request.getContext()).thenReturn(context);
-
     valve.setNext(nextValve);
     valve.invoke(request, response);
 
     verify(store).save(session);
     verify(manager).removeSuper(session);
+  }
+
+  @Test
+  public void testIgnoredHealthCheck() throws Exception {
+    when(request.getRequestURI()).thenReturn("/_ah/health");
+
+    valve.setNext(nextValve);
+    valve.setIgnoredUriPattern("^/_ah/.*");
+    valve.invoke(request, response);
+
+    verify(session, never()).access();
+  }
+
+  @Test
+  public void testIgnoredExtension() throws Exception {
+    when(request.getRequestURI()).thenReturn("/img/foo.png");
+
+    valve.setNext(nextValve);
+    valve.setIgnoredUriPattern(".*\\.(ico|png|gif|jpg|css|js|)$");
+    valve.invoke(request, response);
+
+    verify(session, never()).access();
+  }
+
+  @Test
+  public void testNonIgnoredHealthCheck() throws Exception {
+    when(request.getRequestURI()).thenReturn("/_ah/health");
+
+    valve.setNext(nextValve);
+    valve.setIgnoredUriPattern(".*\\.(ico|png|gif|jpg|css|js|)$");
+    valve.invoke(request, response);
+
+    verify(session).access();
   }
 
 }

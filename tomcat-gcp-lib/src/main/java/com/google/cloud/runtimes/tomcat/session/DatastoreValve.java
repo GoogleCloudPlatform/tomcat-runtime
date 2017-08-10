@@ -16,7 +16,6 @@
 
 package com.google.cloud.runtimes.tomcat.session;
 
-import java.util.regex.Pattern;
 import org.apache.catalina.Context;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -28,6 +27,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 
 /**
@@ -37,7 +37,7 @@ public class DatastoreValve extends ValveBase {
 
   private static final Log log = LogFactory.getLog(DatastoreValve.class);
 
-  private String requestUriIgnorePattern;
+  private String ignoredUriPattern;
 
   /**
    * {@inheritDoc}
@@ -55,7 +55,7 @@ public class DatastoreValve extends ValveBase {
     Manager manager = context.getManager();
 
     Session session = request.getSessionInternal(false);
-    if (session != null && !isURIIgnored(request.getRequestURI())) {
+    if (session != null && !isUriIgnored(request.getRequestURI())) {
       log.debug("Persisting session with id: " + session.getId());
       session.access();
       session.endAccess();
@@ -67,19 +67,21 @@ public class DatastoreValve extends ValveBase {
       } else {
         log.error("In order to persist the session the manager must implement StoreManager");
       }
+    } else {
+      log.debug("Session not persisted");
     }
 
   }
 
   /**
    * Verify if the specified URI should be ignored for session persistence.
-   * @param URI The URI of the request
+   * @param uri The URI of the request
    * @return Whether the URI should be ignored or not
    */
-  private boolean isURIIgnored(String URI) {
+  private boolean isUriIgnored(String uri) {
     boolean ignored = false;
-    if (requestUriIgnorePattern != null) {
-      ignored = Pattern.matches(requestUriIgnorePattern, URI);
+    if (ignoredUriPattern != null) {
+      ignored = Pattern.matches(ignoredUriPattern, uri);
     }
 
     return ignored;
@@ -88,7 +90,7 @@ public class DatastoreValve extends ValveBase {
   /**
    * This property will be injected by Tomcat on startup.
    */
-  public void setRequestUriIgnorePattern(String requestUriIgnorePattern) {
-    this.requestUriIgnorePattern = requestUriIgnorePattern;
+  public void setIgnoredUriPattern(String ignoredUriPattern) {
+    this.ignoredUriPattern = ignoredUriPattern;
   }
 }
