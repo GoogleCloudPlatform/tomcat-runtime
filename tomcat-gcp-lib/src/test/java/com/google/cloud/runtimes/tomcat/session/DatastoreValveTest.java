@@ -87,7 +87,7 @@ public class DatastoreValveTest {
     when(request.getRequestURI()).thenReturn("/_ah/health");
 
     valve.setNext(nextValve);
-    valve.setIgnoredUriPattern("^/_ah/.*");
+    valve.setUriExcludePattern("^/_ah/.*");
     valve.invoke(request, response);
 
     verify(session, never()).access();
@@ -98,7 +98,7 @@ public class DatastoreValveTest {
     when(request.getRequestURI()).thenReturn("/img/foo.png");
 
     valve.setNext(nextValve);
-    valve.setIgnoredUriPattern(".*\\.(ico|png|gif|jpg|css|js|)$");
+    valve.setUriExcludePattern(".*\\.(ico|png|gif|jpg|css|js|)$");
     valve.invoke(request, response);
 
     verify(session, never()).access();
@@ -109,7 +109,7 @@ public class DatastoreValveTest {
     when(request.getRequestURI()).thenReturn("/_ah/health");
 
     valve.setNext(nextValve);
-    valve.setIgnoredUriPattern(".*\\.(ico|png|gif|jpg|css|js|)$");
+    valve.setUriExcludePattern(".*\\.(ico|png|gif|jpg|css|js|)$");
     valve.invoke(request, response);
 
     verify(session).access();

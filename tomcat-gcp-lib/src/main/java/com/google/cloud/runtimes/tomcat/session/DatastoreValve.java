@@ -37,7 +37,7 @@ public class DatastoreValve extends ValveBase {
 
   private static final Log log = LogFactory.getLog(DatastoreValve.class);
 
-  private String ignoredUriPattern;
+  private String uriExcludePattern;
 
   /**
    * {@inheritDoc}
@@ -55,7 +55,7 @@ public class DatastoreValve extends ValveBase {
     Manager manager = context.getManager();
 
     Session session = request.getSessionInternal(false);
-    if (session != null && !isUriIgnored(request.getRequestURI())) {
+    if (session != null && !isUriExcluded(request.getRequestURI())) {
       log.debug("Persisting session with id: " + session.getId());
       session.access();
       session.endAccess();
@@ -78,14 +78,14 @@ public class DatastoreValve extends ValveBase {
    * @param uri The URI of the request
    * @return Whether the URI should be ignored or not
    */
-  private boolean isUriIgnored(String uri) {
-    return ignoredUriPattern != null && Pattern.matches(ignoredUriPattern, uri);
+  private boolean isUriExcluded(String uri) {
+    return uriExcludePattern != null && Pattern.matches(uriExcludePattern, uri);
   }
 
   /**
    * This property will be injected by Tomcat on startup.
    */
-  public void setIgnoredUriPattern(String ignoredUriPattern) {
-    this.ignoredUriPattern = ignoredUriPattern;
+  public void setUriExcludePattern(String uriExcludePattern) {
+    this.uriExcludePattern = uriExcludePattern;
   }
 }

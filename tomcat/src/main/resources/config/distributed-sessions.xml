@@ -1,5 +1,5 @@
 <Valve className="com.google.cloud.runtimes.tomcat.session.DatastoreValve"
-       ignoredUriPattern="${session.DatastoreValve.ignoredUriPattern}" />
+       uriExcludePattern="${session.DatastoreValve.uriExcludePattern}" />
 <Manager className="com.google.cloud.runtimes.tomcat.session.DatastoreManager" >
   <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore"
          namespace="${session.DatastoreStore.namespace}"
