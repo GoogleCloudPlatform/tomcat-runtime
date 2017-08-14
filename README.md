@@ -85,7 +85,7 @@ For example on Google App Engine:
 ```yaml
 env_variables:
   TOMCAT_MODULES_ENABLE: distributed-sessions
-  TOMCAT_PROPERTIES: session.DatastoreStore.sessionMaxInactiveTime=2000,session.DatastoreValve.uriExcludePattern=^/_ah/*
+  TOMCAT_PROPERTIES: session.DatastoreStore.sessionMaxInactiveTime=2000,session.DatastoreValve.uriExcludePattern=^/_ah/.*
 ```
 
 #### Usage outside of Google Cloud Platform
