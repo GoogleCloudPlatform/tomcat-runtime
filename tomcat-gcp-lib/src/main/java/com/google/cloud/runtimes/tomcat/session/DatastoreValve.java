@@ -68,7 +68,7 @@ public class DatastoreValve extends ValveBase {
         log.error("In order to persist the session the manager must implement StoreManager");
       }
     } else {
-      log.debug("Session not persisted (Non existent or the URI is ignored");
+      log.debug("Session not persisted (Non existent or the URI is ignored)");
     }
 
   }
