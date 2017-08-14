@@ -71,13 +71,6 @@ multiple instances of Tomcat to share sessions.
 
 You can enable this feature by adding `distributed-sessions` to the list of optional modules, which is specified in the `TOMCAT_MODULES_ENABLE` environment variable.
 
-For example on Google App Engine:
- 
-```yaml
-env_variables:
-  TOMCAT_MODULES_ENABLE: distributed-sessions
-```
-
 The distributed sessions module can be configured through the environment variable `TOMCAT_PROPERTIES`.
 
 |  Property | Description  | Default  | 
@@ -85,6 +78,15 @@ The distributed sessions module can be configured through the environment variab
 | session.DatastoreStore.namespace    |  Namespace to use in the Datastore.                         |  tomcat-gcp-persistent-session |
 | session.DatastoreStore.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
 | session.DatastoreStore.sessionMaxInactiveTime |  Defines the maximum time (in seconds) a session can be inactive before being deleted by the expiration process. | 3600 |
+| session.DatastoreValve.uriExcludePattern | [Pattern](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) specifying which URI to ignore when persisting sessions. | null |
+
+For example on Google App Engine:
+
+```yaml
+env_variables:
+  TOMCAT_MODULES_ENABLE: distributed-sessions
+  TOMCAT_PROPERTIES: session.DatastoreStore.sessionMaxInactiveTime=2000,session.DatastoreValve.uriExcludePattern=^/_ah/.*
+```
 
 #### Usage outside of Google Cloud Platform
 If you are using the runtime outside of GCP, you will want to make sure that your application has access to

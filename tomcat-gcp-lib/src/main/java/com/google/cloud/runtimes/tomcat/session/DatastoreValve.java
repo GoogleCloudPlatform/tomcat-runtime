@@ -27,6 +27,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 
 /**
@@ -35,6 +36,8 @@ import javax.servlet.ServletException;
 public class DatastoreValve extends ValveBase {
 
   private static final Log log = LogFactory.getLog(DatastoreValve.class);
+
+  private String uriExcludePattern;
 
   /**
    * {@inheritDoc}
@@ -52,7 +55,7 @@ public class DatastoreValve extends ValveBase {
     Manager manager = context.getManager();
 
     Session session = request.getSessionInternal(false);
-    if (session != null) {
+    if (session != null && !isUriExcluded(request.getRequestURI())) {
       log.debug("Persisting session with id: " + session.getId());
       session.access();
       session.endAccess();
@@ -64,7 +67,25 @@ public class DatastoreValve extends ValveBase {
       } else {
         log.error("In order to persist the session the manager must implement StoreManager");
       }
+    } else {
+      log.debug("Session not persisted (Non existent or the URI is ignored)");
     }
 
+  }
+
+  /**
+   * Verify if the specified URI should be ignored for session persistence.
+   * @param uri The URI of the request
+   * @return Whether the URI should be ignored or not
+   */
+  private boolean isUriExcluded(String uri) {
+    return uriExcludePattern != null && Pattern.matches(uriExcludePattern, uri);
+  }
+
+  /**
+   * This property will be injected by Tomcat on startup.
+   */
+  public void setUriExcludePattern(String uriExcludePattern) {
+    this.uriExcludePattern = uriExcludePattern;
   }
 }
