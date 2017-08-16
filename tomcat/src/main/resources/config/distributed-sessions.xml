@@ -1,8 +1,8 @@
 <Valve className="com.google.cloud.runtimes.tomcat.session.DatastoreValve"
-       uriExcludePattern="${session.DatastoreValve.uriExcludePattern}" />
+       uriExcludePattern="${gcp.distributed-sessions.uriExcludePattern}" />
 <Manager className="com.google.cloud.runtimes.tomcat.session.DatastoreManager" >
   <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore"
-         namespace="${session.DatastoreStore.namespace}"
-         sessionKind="${session.DatastoreStore.sessionKind}"
-         sessionMaxInactiveTime="${session.DatastoreStore.sessionMaxInactiveTime}" />
+         namespace="${gcp.distributed-sessions.namespace}"
+         sessionKind="${gcp.distributed-sessions.sessionKind}"
+         sessionMaxInactiveTime="${gcp.distributed-sessions.sessionMaxInactiveTime}" />
 </Manager>
