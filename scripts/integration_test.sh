@@ -50,4 +50,5 @@ echo "Running integration tests on application that is deployed at $DEPLOYED_APP
 gcloud container builds submit \
   --config $testAppDir/target/cloudbuild/integration.yaml \
   --substitutions "_DEPLOYED_APP_URL=$DEPLOYED_APP_URL" \
+  --timeout=25m \
   ${dir}
