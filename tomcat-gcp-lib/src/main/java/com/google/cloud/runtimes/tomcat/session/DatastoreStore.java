@@ -71,12 +71,6 @@ public class DatastoreStore extends StoreBase {
   private String namespace;
 
   /**
-   * Defines the maximum amount of time (in seconds) that a session can be inactive before being
-   * deleted by the expiration process.
-   */
-  private long sessionMaxInactiveTime;
-
-  /**
    * {@inheritDoc}
    *
    * <p>Initiate a connection to the Datastore.</p>
@@ -219,21 +213,25 @@ public class DatastoreStore extends StoreBase {
       ((StandardSession) session).writeObjectData(oos);
     }
 
-    Entity sessionEntity = Entity.newBuilder(keyFactory.newKey(session.getId()))
+    Entity.Builder sessionEntity = Entity.newBuilder(keyFactory.newKey(session.getId()))
         .set("content", Blob.copyFrom(bos.toByteArray()))
-        .set("lastAccess", session.getLastAccessedTime())
-        .build();
+        .set("lastAccess", session.getLastAccessedTime());
 
-    datastore.put(sessionEntity);
+    // A negative time indicates that the session should never time out
+    if (session.getMaxInactiveInterval() >= 0) {
+      sessionEntity.set("expirationTime",
+          session.getLastAccessedTime() + session.getMaxInactiveInterval() * 1000);
+    }
+
+    datastore.put(sessionEntity.build());
   }
 
   @Override
   public void processExpires() {
     log.debug("Processing expired sessions");
-    long limit = System.currentTimeMillis() - sessionMaxInactiveTime * 1000;
 
     Query<Key> query = keyQueryBuilder
-        .setFilter(PropertyFilter.le("lastAccess", limit))
+        .setFilter(PropertyFilter.le("expirationTime", System.currentTimeMillis()))
         .build();
 
     QueryResults<Key> keys = datastore.run(query);
@@ -254,13 +252,6 @@ public class DatastoreStore extends StoreBase {
    */
   public void setSessionKind(String sessionKind) {
     this.sessionKind = sessionKind;
-  }
-
-  /**
-   * This property will be injected by Tomcat on startup.
-   */
-  public void setSessionMaxInactiveTime(long sessionMaxInactiveTime) {
-    this.sessionMaxInactiveTime = sessionMaxInactiveTime;
   }
 
 }

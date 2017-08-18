@@ -37,6 +37,8 @@ public class SessionServlet extends HttpServlet {
 
     int count = 0;
     Object sessionValue = req.getSession().getAttribute("count");
+    resp.getWriter().println("Max inactive time: " + req.getSession().getMaxInactiveInterval());
+
     if (sessionValue != null) {
       count = (int)sessionValue;
       count++;
