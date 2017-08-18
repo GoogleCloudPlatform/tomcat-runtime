@@ -77,7 +77,6 @@ The distributed sessions module can be configured through the environment variab
 |---|---|---|
 | gcp.distributed-sessions.namespace    |  Namespace to use in the Datastore.                         |  tomcat-gcp-persistent-session |
 | gcp.distributed-sessions.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
-| gcp.distributed-sessions.sessionMaxInactiveTime |  Defines the maximum time (in seconds) a session can be inactive before being deleted by the expiration process. | 3600 |
 | gcp.distributed-sessions.uriExcludePattern | [Pattern](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) specifying which URI to ignore when persisting sessions. | null |
 
 For example on Google App Engine:
@@ -85,7 +84,7 @@ For example on Google App Engine:
 ```yaml
 env_variables:
   TOMCAT_MODULES_ENABLE: distributed-sessions
-  TOMCAT_PROPERTIES: gcp.distributed-sessions.sessionMaxInactiveTime=2000,gcp.distributed-sessions.uriExcludePattern=^/_ah/.*
+  TOMCAT_PROPERTIES: gcp.distributed-sessions.uriExcludePattern=^/_ah/.*
 ```
 
 #### Usage outside of Google Cloud Platform

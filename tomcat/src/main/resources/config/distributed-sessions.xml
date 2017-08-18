@@ -3,6 +3,5 @@
 <Manager className="com.google.cloud.runtimes.tomcat.session.DatastoreManager" >
   <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore"
          namespace="${gcp.distributed-sessions.namespace}"
-         sessionKind="${gcp.distributed-sessions.sessionKind}"
-         sessionMaxInactiveTime="${gcp.distributed-sessions.sessionMaxInactiveTime}" />
+         sessionKind="${gcp.distributed-sessions.sessionKind}" />
 </Manager>
