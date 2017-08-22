@@ -7,4 +7,3 @@ steps:
     args:
       - '--no-deploy'
       - '--url=${_DEPLOYED_APP_URL}'
-      - '--skip-monitoring-tests'
