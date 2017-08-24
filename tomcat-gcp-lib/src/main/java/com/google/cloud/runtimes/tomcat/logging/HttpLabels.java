@@ -17,11 +17,11 @@
 package com.google.cloud.runtimes.tomcat.logging;
 
 class HttpLabels {
-  static final String REQUEST_SIZE = "/request/size";
-  static final String RESPONSE_SIZE = "/response/size";
-  static final String HTTP_METHOD = "/http/method";
-  static final String HTTP_STATUS_CODE = "/http/status_code";
-  static final String HTTP_URL = "/http/url";
-  static final String HTTP_USER_AGENT = "/http/user_agent";
-  static final String HTTP_CLIENT_PROTOCOL = "/http/client_protocol";
+  public static final String REQUEST_SIZE = "/request/size";
+  public static final String RESPONSE_SIZE = "/response/size";
+  public static final String HTTP_METHOD = "/http/method";
+  public static final String HTTP_STATUS_CODE = "/http/status_code";
+  public static final String HTTP_URL = "/http/url";
+  public static final String HTTP_USER_AGENT = "/http/user_agent";
+  public static final String HTTP_CLIENT_PROTOCOL = "/http/client_protocol";
 }
