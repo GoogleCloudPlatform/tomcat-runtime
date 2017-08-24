@@ -19,12 +19,14 @@ package com.google.cloud.runtimes.tomcat.logging;
 import com.google.cloud.ServiceOptions;
 import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
+import com.google.cloud.trace.core.Labels;
 import com.google.cloud.trace.core.SpanContext;
 import com.google.cloud.trace.core.SpanContextFactory;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceGrpcApiService;
 import com.google.cloud.trace.service.TraceService;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.net.HttpHeaders;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Request;
@@ -115,7 +117,37 @@ public class TraceValve extends ValveBase {
 
     getNext().invoke(request, response);
 
+    tracer.annotateSpan(context, createLabels(request, response));
+
     tracer.endSpan(context);
+  }
+
+  /**
+   * Create labels for Stackdriver trace with basic response and request info.
+   */
+  private Labels createLabels(Request request, Response response) {
+    Labels.Builder labels = Labels.builder();
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_METHOD, request.getMethod());
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_URL, request.getRequestURI());
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_CLIENT_PROTOCOL,
+            request.getProtocol());
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_USER_AGENT,
+            request.getHeader(HttpHeaders.USER_AGENT));
+    this.annotateIfNotEmpty(labels, HttpLabels.REQUEST_SIZE,
+            request.getHeader(HttpHeaders.CONTENT_LENGTH));
+    this.annotateIfNotEmpty(labels, HttpLabels.RESPONSE_SIZE,
+            response.getHeader(HttpHeaders.CONTENT_LENGTH));
+    labels.add(HttpLabels.HTTP_STATUS_CODE, Integer.toString(response.getStatus()));
+    return labels.build();
+  }
+
+  /**
+   * Make sure that only labels with actual values are added.
+   */
+  private void annotateIfNotEmpty(Labels.Builder labels, String key, String value) {
+    if (value != null && value.length() > 0) {
+      labels.add(key, value);
+    }
   }
 
   /**
