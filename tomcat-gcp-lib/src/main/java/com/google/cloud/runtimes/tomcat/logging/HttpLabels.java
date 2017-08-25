@@ -18,7 +18,7 @@ package com.google.cloud.runtimes.tomcat.logging;
 
 class HttpLabels {
   public static final String REQUEST_SIZE = "/request/size";
-  public static final String RESPONSE_SIZE = "/response/size";
+  public static final String RESPONSE_SIZE = "/http/response/size";
   public static final String HTTP_METHOD = "/http/method";
   public static final String HTTP_STATUS_CODE = "/http/status_code";
   public static final String HTTP_URL = "/http/url";
