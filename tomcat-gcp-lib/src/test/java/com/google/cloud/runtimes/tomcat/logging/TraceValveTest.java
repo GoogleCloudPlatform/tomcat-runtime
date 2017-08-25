@@ -15,15 +15,19 @@
  */
 package com.google.cloud.runtimes.tomcat.logging;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.trace.SpanContextHandler;
 import com.google.cloud.trace.Tracer;
+import com.google.cloud.trace.core.Label;
+import com.google.cloud.trace.core.Labels;
 import com.google.cloud.trace.core.SpanContext;
 import com.google.cloud.trace.core.SpanContextFactory;
 import com.google.cloud.trace.core.TraceContext;
@@ -34,6 +38,7 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -89,10 +94,20 @@ public class TraceValveTest {
   @Test
   public void testSpanCreation() throws Exception {
     when(request.getRequestURI()).thenReturn("/index");
+    when(response.getStatus()).thenReturn(200);
+    ArgumentCaptor<Labels> labelsArgument = ArgumentCaptor.forClass(Labels.class);
+    ArgumentCaptor<TraceContext> traceArgument = ArgumentCaptor.forClass(TraceContext.class);
+    Label indexLabel = new Label(HttpLabels.HTTP_URL.getValue(), "/index");
+    Label statusCodeLabel = new Label(HttpLabels.HTTP_STATUS_CODE.getValue(), "200");
+
     valve.invoke(request, response);
 
-    verify(tracer).startSpan(contains("/index"));
+    verify(tracer).startSpan(matches("/index"));
+    verify(tracer).annotateSpan(traceArgument.capture(), labelsArgument.capture());
     verify(tracer).endSpan(traceContext);
+    assertEquals(labelsArgument.getValue().getLabels().size(), 2);
+    assertTrue(labelsArgument.getValue().getLabels().contains(indexLabel));
+    assertTrue(labelsArgument.getValue().getLabels().contains(statusCodeLabel));
   }
 
   /**
