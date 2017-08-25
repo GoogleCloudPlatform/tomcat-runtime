@@ -16,6 +16,10 @@
 
 package com.google.cloud.runtimes.tomcat.session;
 
+import java.io.IOException;
+import java.util.regex.Pattern;
+import javax.servlet.ServletException;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -26,9 +30,6 @@ import org.apache.catalina.valves.ValveBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-import java.io.IOException;
-import java.util.regex.Pattern;
-import javax.servlet.ServletException;
 
 /**
  * This valve uses the Store Manager to persist the session after each request.
