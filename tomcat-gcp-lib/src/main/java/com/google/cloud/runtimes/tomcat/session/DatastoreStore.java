@@ -141,7 +141,7 @@ public class DatastoreStore extends StoreBase {
    * <p>Look in the Datastore for a serialized session and attempt to deserialize it.</p>
    *
    * <p>If the session is successfully deserialized, it is added to the current manager and is
-   * returned by this method. Otherwise null is returned </p>
+   * returned by this method. Otherwise null is returned.</p>
    *
    * @param id Session identifier of the session to load
    * @return The loaded session instance

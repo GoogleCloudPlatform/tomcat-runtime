@@ -126,7 +126,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   public void unload() throws IOException {}
 
   /**
-   * Remove the Session from the manager but not from the Datastore
+   * Remove the Session from the manager but not from the Datastore.
    *
    * @param session The session to remove.
    */

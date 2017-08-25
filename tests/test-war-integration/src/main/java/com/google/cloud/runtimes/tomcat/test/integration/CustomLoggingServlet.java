@@ -13,56 +13,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.google.cloud.runtimes.tomcat.test.simple;
+
+package com.google.cloud.runtimes.tomcat.test.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.cloud.MonitoredResource;
+import com.google.cloud.logging.LogEntry;
+import com.google.cloud.logging.Logging;
+import com.google.cloud.logging.LoggingOptions;
+import com.google.cloud.logging.Payload;
+import com.google.cloud.logging.Severity;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Collections;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = "/logging_standard")
-public class StandardLoggingServlet extends HttpServlet {
-
-  private static final Logger logger = Logger.getLogger(StandardLoggingServlet.class.getName());
+@WebServlet(urlPatterns = "/logging_custom")
+public class CustomLoggingServlet extends HttpServlet {
 
   private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  private final Logging logging = LoggingOptions.getDefaultInstance().getService();
 
   @Override
   protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
-    JsonNode body = objectMapper.readTree(req.getReader());
-    String token = body.path("token").asText();
-    String level = convertStackdriverSeverityToLoggingLevel(body.path("level").asText());
 
-    logger.log(Level.parse(level), token);
+    JsonNode body = objectMapper.readTree(req.getReader());
+    String logName = body.path("log_name").asText();
+    String token = body.path("token").asText();
+    Severity severity = Severity.valueOf(body.path("level").asText());
+
+    LogEntry logEntry = LogEntry.newBuilder(Payload.StringPayload.of(token))
+        .setLogName(logName)
+        .setSeverity(severity)
+        .setResource(MonitoredResource.newBuilder("global").build())
+        .build();
+
+    logging.write(Collections.singletonList(logEntry));
 
     resp.setContentType("text/plain");
-    resp.getWriter().println(URLEncoder.encode("appengine.googleapis.com/stdout", "UTF-8"));
-  }
-
-  private String convertStackdriverSeverityToLoggingLevel(String severity) {
-    String level;
-    switch (severity) {
-      case "DEBUG":
-        level = "FINE";
-        break;
-      case "ERROR":
-      case "CRITICAL":
-      case "ALERT":
-        level = "SEVERE";
-        break;
-      default:
-        level = severity;
-        break;
-    }
-
-    return level;
+    resp.getWriter().println(URLEncoder.encode(logName, "UTF-8"));
   }
 }

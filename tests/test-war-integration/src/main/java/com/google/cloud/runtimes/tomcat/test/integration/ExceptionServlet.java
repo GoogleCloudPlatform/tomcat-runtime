@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.test.simple;
+package com.google.cloud.runtimes.tomcat.test.integration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -23,24 +25,26 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Reference the custom tests for the integration framework
- * (https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests)
- */
-@WebServlet(urlPatterns = {"/custom"})
-public class CustomServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/exception"})
+public class ExceptionServlet extends HttpServlet {
+
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+
+  static class ExceptionRequest {
+    public String token;
+  }
 
   @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
-    StringBuilder configuration = new StringBuilder();
-    configuration.append("[");
-    configuration.append("{\"path\": \"custom/tests/secure\"},");
-    // Dump the server configuration into the test logs
-    configuration.append("{\"path\": \"dump/all\"}");
-    configuration.append("]");
+    ExceptionRequest exceptionRequest
+        = objectMapper.readValue(req.getReader(), ExceptionRequest.class);
 
-    resp.setContentType("application/json");
-    resp.getWriter().print(configuration.toString());
+    // Print an exception stack trace containing the provided token. This should be picked up by
+    // Stackdriver exception monitoring.
+    new RuntimeException(String.format(
+        "Sample runtime exception for integration test. Token is %s", exceptionRequest.token))
+        .printStackTrace();
   }
+
 }
