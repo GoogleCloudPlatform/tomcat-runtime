@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.logging;
+package com.google.cloud.runtimes.tomcat.trace;
 
 import com.google.cloud.ServiceOptions;
 import com.google.cloud.trace.Trace;

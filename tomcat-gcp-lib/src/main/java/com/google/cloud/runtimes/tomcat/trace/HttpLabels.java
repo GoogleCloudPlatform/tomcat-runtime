@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.logging;
+package com.google.cloud.runtimes.tomcat.trace;
 
 public enum HttpLabels {
   HTTP_REQUEST_SIZE("/http/request/size"),
