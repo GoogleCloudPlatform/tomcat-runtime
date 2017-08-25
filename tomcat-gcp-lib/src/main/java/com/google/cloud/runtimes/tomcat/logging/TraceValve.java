@@ -135,7 +135,7 @@ public class TraceValve extends ValveBase {
             request.getHeader(HttpHeaders.USER_AGENT));
     this.annotateIfNotEmpty(labels, HttpLabels.REQUEST_SIZE,
             request.getHeader(HttpHeaders.CONTENT_LENGTH));
-    this.annotateIfNotEmpty(labels, HttpLabels.RESPONSE_SIZE,
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_RESPONSE_SIZE,
             response.getHeader(HttpHeaders.CONTENT_LENGTH));
     labels.add(HttpLabels.HTTP_STATUS_CODE, Integer.toString(response.getStatus()));
     return labels.build();
