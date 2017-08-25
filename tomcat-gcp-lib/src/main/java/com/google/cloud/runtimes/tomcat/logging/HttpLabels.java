@@ -17,7 +17,7 @@
 package com.google.cloud.runtimes.tomcat.logging;
 
 public enum HttpLabels {
-  REQUEST_SIZE("/request/size"),
+  HTTP_REQUEST_SIZE("/http/request/size"),
   HTTP_RESPONSE_SIZE("/http/response/size"),
   HTTP_METHOD("/http/method"),
   HTTP_STATUS_CODE("/http/status_code"),
