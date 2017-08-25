@@ -28,6 +28,9 @@ import com.google.cloud.trace.service.TraceService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.HttpHeaders;
 
+import java.io.IOException;
+import javax.servlet.ServletException;
+
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
@@ -35,8 +38,6 @@ import org.apache.catalina.valves.ValveBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 
 /**
  * This valve sends information about the requests to the Stackdriver Trace service.

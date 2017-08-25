@@ -16,6 +16,11 @@
 
 package com.google.cloud.runtimes.tomcat.session;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.LifecycleState;
@@ -27,10 +32,6 @@ import org.apache.catalina.session.StoreBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Implementation of the {@code org.apache.catalina.Manager} interface which uses
@@ -125,7 +126,7 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   public void unload() throws IOException {}
 
   /**
-   * Remove the Session from the manager but not from the Datastore
+   * Remove the Session from the manager but not from the Datastore.
    *
    * @param session The session to remove.
    */

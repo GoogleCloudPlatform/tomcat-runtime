@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.test.simple;
+package com.google.cloud.runtimes.tomcat.test.integration;
 
 import java.io.IOException;
 import java.io.PrintWriter;

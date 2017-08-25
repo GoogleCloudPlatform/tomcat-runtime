@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.test.simple;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+package com.google.cloud.runtimes.tomcat.test.integration;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -25,26 +23,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(urlPatterns = {"/exception"})
-public class ExceptionServlet extends HttpServlet {
-
-  private static final ObjectMapper objectMapper = new ObjectMapper();
-
-  static class ExceptionRequest {
-    public String token;
-  }
+@WebServlet(urlPatterns = {"/hello/*"})
+public class HelloServlet extends HttpServlet {
 
   @Override
-  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
-    ExceptionRequest exceptionRequest
-        = objectMapper.readValue(req.getReader(), ExceptionRequest.class);
-
-    // Print an exception stack trace containing the provided token. This should be picked up by
-    // Stackdriver exception monitoring.
-    new RuntimeException(String.format(
-        "Sample runtime exception for integration test. Token is %s", exceptionRequest.token))
-        .printStackTrace();
+    resp.setContentType("text.plain");
+    resp.getWriter().println("Hello from the simple war application");
   }
 
 }

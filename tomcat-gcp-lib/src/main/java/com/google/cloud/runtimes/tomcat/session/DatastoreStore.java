@@ -28,6 +28,13 @@ import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.common.collect.Streams;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Arrays;
+
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Session;
 import org.apache.catalina.session.StandardSession;
@@ -35,12 +42,6 @@ import org.apache.catalina.session.StoreBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.Arrays;
 
 /**
  * This store interacts with the Datastore service to persist sessions.
@@ -140,7 +141,7 @@ public class DatastoreStore extends StoreBase {
    * <p>Look in the Datastore for a serialized session and attempt to deserialize it.</p>
    *
    * <p>If the session is successfully deserialized, it is added to the current manager and is
-   * returned by this method. Otherwise null is returned </p>
+   * returned by this method. Otherwise null is returned.</p>
    *
    * @param id Session identifier of the session to load
    * @return The loaded session instance

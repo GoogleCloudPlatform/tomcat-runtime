@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.cloud.runtimes.tomcat.test.simple;
+package com.google.cloud.runtimes.tomcat.test.integration;
 
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -29,13 +29,17 @@ import javax.servlet.http.HttpServletResponse;
  * (e.g the application is served by a load balancer)
  * the connection is considered as secure.
  *
+ * <p>
  * Note:
- * - If the request with the header x-forwarded-proto does not come from a local ip the
- *   connection will not be considered as secure.
+ * <ul>
+ * <li>If the request with the header x-forwarded-proto does not come from a local ip the
+ *   connection will not be considered as secure.</li>
  *
- * - In Tomcat this header is interpreted by the valve:
+ * <li>In Tomcat this header is interpreted by the valve:
  *   https://tomcat.apache.org/tomcat-9.0-doc/config/valve.html#Remote_IP_Valve
- *   See tomcat-base/server.xml for the configuration.
+ *   See tomcat-base/server.xml for the configuration.</li>
+ * </ul>
+ * </p>
  */
 @WebServlet(urlPatterns = "/custom/tests/secure")
 public class SecureTestServlet extends HttpServlet {
@@ -50,12 +54,12 @@ public class SecureTestServlet extends HttpServlet {
 
       if (req.getHeader("x-forwarded-proto").equals("http") && req.isSecure()) {
         resp.setStatus(500);
-        resp.getWriter().println("Error: x-forwarded-proto is set to http and the connection is considered secure");
-      }
-
-      else if (req.getHeader("x-forwarded-proto").equals("https") && !req.isSecure()) {
+        resp.getWriter().println(
+            "Error: x-forwarded-proto is set to http and the connection is considered secure");
+      } else if (req.getHeader("x-forwarded-proto").equals("https") && !req.isSecure()) {
         resp.setStatus(500);
-        resp.getWriter().println("Error: x-forwarded-proto is set to https but the connection is not considered secure");
+        resp.getWriter().println(
+            "Error: x-forwarded-proto is set to https but the connection is not considered secure");
       }
     }
   }
