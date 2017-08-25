@@ -1,2 +1,2 @@
-<Valve className="com.google.cloud.runtimes.tomcat.logging.TraceValve"
+<Valve className="com.google.cloud.runtimes.tomcat.trace.TraceValve"
     traceScheduledDelay="${gcp.stackdriver-trace.scheduledDelay}"/>
