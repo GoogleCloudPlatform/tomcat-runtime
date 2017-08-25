@@ -127,17 +127,17 @@ public class TraceValve extends ValveBase {
    */
   private Labels createLabels(Request request, Response response) {
     Labels.Builder labels = Labels.builder();
-    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_METHOD, request.getMethod());
-    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_URL, request.getRequestURI());
-    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_CLIENT_PROTOCOL,
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_METHOD.getValue(), request.getMethod());
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_URL.getValue(), request.getRequestURI());
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_CLIENT_PROTOCOL.getValue(),
             request.getProtocol());
-    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_USER_AGENT,
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_USER_AGENT.getValue(),
             request.getHeader(HttpHeaders.USER_AGENT));
-    this.annotateIfNotEmpty(labels, HttpLabels.REQUEST_SIZE,
+    this.annotateIfNotEmpty(labels, HttpLabels.REQUEST_SIZE.getValue(),
             request.getHeader(HttpHeaders.CONTENT_LENGTH));
-    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_RESPONSE_SIZE,
+    this.annotateIfNotEmpty(labels, HttpLabels.HTTP_RESPONSE_SIZE.getValue(),
             response.getHeader(HttpHeaders.CONTENT_LENGTH));
-    labels.add(HttpLabels.HTTP_STATUS_CODE, Integer.toString(response.getStatus()));
+    labels.add(HttpLabels.HTTP_STATUS_CODE.getValue(), Integer.toString(response.getStatus()));
     return labels.build();
   }
 
