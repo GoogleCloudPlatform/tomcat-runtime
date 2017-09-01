@@ -46,6 +46,7 @@
     <Connector port="8080" protocol="HTTP/1.1"
         executor="tomcatThreadPool"
         connectionTimeout="20000"
+        compression="${tomcat.server.connector.compression}"
         redirectPort="443" />
 
     <Engine name="Catalina" defaultHost="localhost">

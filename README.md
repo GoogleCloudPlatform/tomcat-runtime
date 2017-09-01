@@ -130,6 +130,20 @@ com.google.cloud.logging.LoggingHandler.formatter=java.util.logging.SimpleFormat
 java.util.logging.SimpleFormatter.format=%3$s: %5$s%6$s
 ```
 
+### Enabling gzip compression
+Tomcat offers the possibility to use GZIP compression.
+ 
+To take advantage of this feature set the property `tomcat.server.connector.compression` to `on`:
+```yaml
+env_variables:
+  TOMCAT_PROPERTIES: tomcat.server.connector.compression=on
+```
+
+You can also specify a numerical value indicating the minimal amount of data (in bytes) before using compression.
+
+Detailed documentation can be found in the [Tomcat documentation](http://tomcat.apache.org/tomcat-8.5-doc/config/http.html), 
+at the attribute `compression`.
+
 ## Development Guide
 
 * See [instructions](DEVELOPING.md) on how to build and test this image.
