@@ -331,4 +331,11 @@ public class DatastoreStore extends StoreBase {
   public void setTraceRequest(boolean traceRequest) {
     this.traceRequest = traceRequest;
   }
+
+  /**
+   * This property will be injected by Tomcat on startup.
+   */
+  public void setUseUniqueEntity(boolean useUniqueEntity) {
+    this.useUniqueEntity = useUniqueEntity;
+  }
 }
