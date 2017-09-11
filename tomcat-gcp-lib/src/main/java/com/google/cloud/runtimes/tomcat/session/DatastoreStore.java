@@ -19,6 +19,7 @@ package com.google.cloud.runtimes.tomcat.session;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.Entity.Builder;
 import com.google.cloud.datastore.EntityValue;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
@@ -75,7 +76,7 @@ public class DatastoreStore extends StoreBase {
    */
   private String namespace;
 
-  private boolean useUniqueEntity = true;
+  private boolean useUniqueEntity = false;
 
   private boolean traceRequest = true;
 
@@ -237,30 +238,42 @@ public class DatastoreStore extends StoreBase {
     }
     DatastoreSession datastoreSession = (DatastoreSession) session;
 
+    List<FullEntity> entities = serializeSession(datastoreSession);
+
+    TraceContext datastoreSaveContext = startSpan("Storing the session in the Datastore");
+    datastore.put(entities.toArray(new FullEntity[0]));
+    endSpan(datastoreSaveContext);
+  }
+
+  /**
+   * Serialize a session on a list of Entities that can be send to the Datastore.
+   * @param session The session to serialize.
+   * @return A list of one or more entities containing the session and its attributes.
+   * @throws IOException If the session cannot be serialized.
+   */
+  private List<FullEntity> serializeSession(DatastoreSession session)
+      throws IOException {
+    TraceContext serializationContext = startSpan("Serialization of the session");
+    List<FullEntity> entities = new ArrayList<>();
     Key sessionKey = sessionKeyFactory.newKey(session.getId());
     KeyFactory attributeKeyFactory = datastore.newKeyFactory()
         .setKind(getAttributesKind())
         .addAncestor(PathElement.of(sessionKind, sessionKey.getName()));
 
-    List<FullEntity> entities = new ArrayList<>();
+    Builder sessionEntity = session.saveMetadataToEntity(sessionKey);
+    List<FullEntity> attributes = session.saveAttributesToEntity(attributeKeyFactory);
 
-    TraceContext serializationContext = startSpan("Serialization of the session");
-    Entity.Builder sessionEntity = datastoreSession.saveMetadataToEntity(sessionKey);
-    List<FullEntity> attributes = datastoreSession.saveAttributesToEntity(attributeKeyFactory);
     if (useUniqueEntity) {
-      sessionEntity.set("attributes", attributes.stream()
-          .map(EntityValue::of).collect(Collectors.toList()));
+      // Embed all the attributes entities into the session entity.
+      sessionEntity.set("attributes",
+          attributes.stream().map(EntityValue::of).collect(Collectors.toList())
+      );
     } else {
       entities.addAll(attributes);
     }
-
     entities.add(sessionEntity.build());
-
     endSpan(serializationContext);
-
-    TraceContext datastoreSaveContext = startSpan("Storing session");
-    datastore.put(entities.toArray(new FullEntity[0]));
-    endSpan(datastoreSaveContext);
+    return entities;
   }
 
   @Override
