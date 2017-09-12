@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -162,36 +163,59 @@ public class DatastoreStore extends StoreBase {
 
     TraceContext metadataContext = startSpan("Load metadata from Datastore");
     Key sessionKey = sessionKeyFactory.newKey(id);
-    Entity sessionEntity = datastore.get(sessionKey);
     endSpan(metadataContext);
 
-    DatastoreSession session = null;
+    DatastoreSession session = deserializeSession(sessionKey);
 
-    if (sessionEntity != null) {
-      TraceContext entitiesContext = startSpan("Load attributes from Datastore");
-      List<FullEntity> attributeEntities = new LinkedList<>();
-      if (useUniqueEntity) {
-        if (sessionEntity.contains("attributes")) {
-          sessionEntity.<EntityValue>getList("attributes")
-              .forEach(val -> attributeEntities.add(val.get()));
-        }
-      } else {
-        datastore.run(Query.newEntityQueryBuilder()
-            .setKind(getAttributesKind())
-            .setFilter(PropertyFilter.hasAncestor(sessionKey))
-            .build())
-            .forEachRemaining(attributeEntities::add);
+    log.debug("Session " + id + " loaded");
+    return session;
+  }
+
+  /**
+   * Create a new session usable by Tomcat from a session serialized in a Datastore Entity.
+   * @param sessionKey The key associated to the session metadata and its attributes.
+   * @return A new session containing the metadata and attributes stored into the entity.
+   * @throws ClassNotFoundException Thrown if the class serialized in the entity is not available in
+   *                                this context.
+   * @throws IOException Thrown when an error occur during the deserialization.
+   */
+  private DatastoreSession deserializeSession(Key sessionKey)
+      throws ClassNotFoundException, IOException {
+    Entity sessionEntity = null;
+
+    TraceContext entitiesContext = startSpan("Load attributes from Datastore");
+    List<FullEntity> attributeEntities = new LinkedList<>();
+    if (useUniqueEntity) {
+      sessionEntity = datastore.get(sessionKey);
+      if (sessionEntity.contains("attributes")) {
+        sessionEntity.<EntityValue>getList("attributes")
+            .forEach(val -> attributeEntities.add(val.get()));
       }
-      endSpan(entitiesContext);
+    } else {
+      Iterator<Entity> entities = datastore.run(Query.newEntityQueryBuilder()
+          .setKind(getAttributesKind())
+          .setFilter(PropertyFilter.hasAncestor(sessionKey))
+          .build());
 
+      while (entities.hasNext()) {
+        Entity entity = entities.next();
+        if (entity.getKey().equals(sessionKey)) {
+          sessionEntity = entity;
+        } else {
+          attributeEntities.add(entity);
+        }
+      }
+    }
+    endSpan(entitiesContext);
+
+    DatastoreSession session = null;
+    if (sessionEntity != null) {
       session = (DatastoreSession) manager.createEmptySession();
       TraceContext deserializationContext = startSpan("Deserialization of the session");
       session.restoreFromEntities(sessionEntity, attributeEntities);
+      session.setId(sessionKey.getName());
       endSpan(deserializationContext);
-      session.setId(id);
     }
-
-    log.debug("Session " + id + " loaded");
     return session;
   }
 
