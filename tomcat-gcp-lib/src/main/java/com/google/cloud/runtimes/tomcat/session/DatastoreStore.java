@@ -77,8 +77,15 @@ public class DatastoreStore extends StoreBase {
    */
   private String namespace;
 
+  /**
+   * If true the session attributes are in the same entity as the session metadata, otherwise,
+   * each attribute is saved in a distinct entity.
+   */
   private boolean useUniqueEntity = false;
 
+  /**
+   * Whether or not to send traces to Stackdriver for the operations related to session persistence.
+   */
   private boolean traceRequest = true;
 
   /**
@@ -160,10 +167,7 @@ public class DatastoreStore extends StoreBase {
   @Override
   public Session load(String id) throws ClassNotFoundException, IOException {
     log.debug("Session " + id + " requested");
-
-    TraceContext metadataContext = startSpan("Load metadata from Datastore");
     Key sessionKey = sessionKeyFactory.newKey(id);
-    endSpan(metadataContext);
 
     DatastoreSession session = deserializeSession(sessionKey);
 
@@ -181,13 +185,13 @@ public class DatastoreStore extends StoreBase {
    */
   private DatastoreSession deserializeSession(Key sessionKey)
       throws ClassNotFoundException, IOException {
-    Entity sessionEntity = null;
 
-    TraceContext entitiesContext = startSpan("Load attributes from Datastore");
+    TraceContext sessionFetchingContext = startSpan("Load the session from Datastore");
+    Entity sessionEntity = null;
     List<FullEntity> attributeEntities = new LinkedList<>();
     if (useUniqueEntity) {
       sessionEntity = datastore.get(sessionKey);
-      if (sessionEntity.contains("attributes")) {
+      if (sessionEntity != null && sessionEntity.contains("attributes")) {
         sessionEntity.<EntityValue>getList("attributes")
             .forEach(val -> attributeEntities.add(val.get()));
       }
@@ -206,7 +210,7 @@ public class DatastoreStore extends StoreBase {
         }
       }
     }
-    endSpan(entitiesContext);
+    endSpan(sessionFetchingContext);
 
     DatastoreSession session = null;
     if (sessionEntity != null) {
@@ -270,7 +274,7 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * Serialize a session on a list of Entities that can be send to the Datastore.
+   * Serialize a session to a list of Entities that can be stored to the Datastore.
    * @param session The session to serialize.
    * @return A list of one or more entities containing the session and its attributes.
    * @throws IOException If the session cannot be serialized.

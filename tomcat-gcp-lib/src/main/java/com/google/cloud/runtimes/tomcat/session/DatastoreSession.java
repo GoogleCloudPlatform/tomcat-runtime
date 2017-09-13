@@ -86,10 +86,6 @@ public class DatastoreSession extends StandardSession {
     thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
 
     for (FullEntity entity : attributes) {
-      log.info("storing session:" + entity.getKey());
-      if (!(entity.getKey() instanceof Key) || !entity.contains("value")) {
-        continue;
-      }
       String name = ((Key) entity.getKey()).getName();
       Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
       try (InputStream fis = value.asInputStream();
@@ -132,7 +128,6 @@ public class DatastoreSession extends StandardSession {
    */
   public List<FullEntity> saveAttributesToEntity(KeyFactory attributeKeyFactory) throws
       IOException {
-
     Stream<FullEntity> entities = Collections
         .list(getAttributeNames())
         .stream()

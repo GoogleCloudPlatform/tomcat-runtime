@@ -106,7 +106,6 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
       log.warn("An error occurred during session deserialization", ex);
     }
 
-
     return session;
   }
 
