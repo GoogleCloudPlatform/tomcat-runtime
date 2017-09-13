@@ -22,6 +22,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,7 +40,8 @@ import org.apache.juli.logging.LogFactory;
 
 public class DatastoreSession extends StandardSession {
 
-  private enum SessionMetadata {
+  @VisibleForTesting
+  enum SessionMetadata {
     CREATION_TIME("creationTime"),
     LAST_ACCESSED_TIME("lastAccessedTime"),
     MAX_INACTIVE_INTERVAL("maxInactiveInterval"),
