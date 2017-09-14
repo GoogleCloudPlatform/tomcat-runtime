@@ -32,6 +32,7 @@ import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.TraceContext;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 
 import java.io.IOException;
@@ -81,12 +82,12 @@ public class DatastoreStore extends StoreBase {
    * If true the session attributes are in the same entity as the session metadata, otherwise,
    * each attribute is saved in a distinct entity.
    */
-  private boolean useUniqueEntity = false;
+  private boolean useUniqueEntity = true;
 
   /**
    * Whether or not to send traces to Stackdriver for the operations related to session persistence.
    */
-  private boolean traceRequest = true;
+  private boolean traceRequest = false;
 
   /**
    * {@inheritDoc}
@@ -365,5 +366,21 @@ public class DatastoreStore extends StoreBase {
    */
   public void setUseUniqueEntity(boolean useUniqueEntity) {
     this.useUniqueEntity = useUniqueEntity;
+  }
+
+  @VisibleForTesting
+  void setDatastore(Datastore datastore) {
+    this.datastore = datastore;
+  }
+
+  @VisibleForTesting
+  void setSessionKeyFactory(KeyFactory sessionKeyFactory) {
+    this.sessionKeyFactory = sessionKeyFactory;
+  }
+
+  @VisibleForTesting
+  void setKeyQueryBuilder(
+      StructuredQuery.Builder<Key> keyQueryBuilder) {
+    this.keyQueryBuilder = keyQueryBuilder;
   }
 }
