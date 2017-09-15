@@ -43,6 +43,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Session;
 import org.apache.catalina.session.StoreBase;
@@ -187,7 +188,7 @@ public class DatastoreStore extends StoreBase {
   private DatastoreSession deserializeSession(Key sessionKey)
       throws ClassNotFoundException, IOException {
 
-    TraceContext sessionFetchingContext = startSpan("Load the session from Datastore");
+    TraceContext sessionFetchingContext = startSpan("Loading the session from Datastore");
     Entity sessionEntity = null;
     List<FullEntity> attributeEntities = new LinkedList<>();
     if (useUniqueEntity) {
@@ -315,10 +316,21 @@ public class DatastoreStore extends StoreBase {
 
     QueryResults<Key> keys = datastore.run(query);
 
-    datastore.delete(Streams.stream(keys).toArray(Key[]::new));
+    if (useUniqueEntity) {
+      datastore.delete(Streams.stream(keys).toArray(Key[]::new));
+    } else {
+      Stream<Key> toDelete = Streams.stream(keys)
+            .parallel()
+            .flatMap(key ->
+                Streams.stream(datastore.run(keyQueryBuilder
+                  .setFilter(PropertyFilter.hasAncestor(key))
+                  .build()))
+            );
+      datastore.delete(toDelete.toArray(Key[]::new));
+    }
   }
 
-  private TraceContext startSpan(String spanName) {
+  TraceContext startSpan(String spanName) {
     if (traceRequest) {
       Tracer tracer = Trace.getTracer();
       return tracer.startSpan(spanName);
