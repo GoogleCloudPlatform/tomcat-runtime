@@ -19,6 +19,7 @@ package com.google.cloud.runtimes.tomcat.session;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -55,6 +56,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -77,6 +79,8 @@ public class DatastoreStoreTest {
 
   private DatastoreStore store;
 
+  private StructuredQuery.Builder<Key> keyBuilder;
+
   private static final String keyId = "123";
 
   @Before
@@ -85,7 +89,7 @@ public class DatastoreStoreTest {
     store = new DatastoreStore();
     keyFactory = new KeyFactory("project").setKind("kind");
     key = keyFactory.newKey(keyId);
-    StructuredQuery.Builder<Key> keyBuilder = Query.newKeyQueryBuilder().setKind("kind");
+    keyBuilder = Query.newKeyQueryBuilder().setKind("kind");
     QueryResults<Key> keyQueryResults = new IteratorQueryResults<>(ImmutableList.of(key).iterator());
 
     when(datastore.newKeyFactory()).thenReturn(keyFactory);
@@ -168,6 +172,20 @@ public class DatastoreStoreTest {
   }
 
   @Test
+  public void testDecomposedSessionExpiration() throws Exception {
+    store.setUseUniqueEntity(false);
+    Key attributeKey = keyFactory.newKey("attribute");
+
+    when(datastore.<Query<Key>>run(any(Query.class))).thenReturn(
+        new IteratorQueryResults<>(Collections.singletonList(key).iterator()),
+        new IteratorQueryResults<>(Arrays.asList(key, attributeKey).iterator())
+    );
+
+    store.processExpires();
+    verify(datastore).delete(Arrays.asList(key, attributeKey).toArray(new Key[0]));
+  }
+
+  @Test
   public void testSessionSave() throws Exception {
     DatastoreSession session = spy(new DatastoreSession(manager));
     session.setValid(true);
@@ -228,7 +246,47 @@ public class DatastoreStoreTest {
         ((Map<String, String>)session.getSession().getAttribute("map")).get("key"));
   }
 
+  @Test
+  public void testSerializationTracing() throws Exception {
+    DatastoreStore storeSpy = spy(store);
 
+    DatastoreSession session = new DatastoreSession(manager);
+    session.setValid(true);
+    session.setId(keyId);
+
+    storeSpy.save(session);
+    verify(storeSpy).startSpan(contains("Serialization"));
+    verify(storeSpy).startSpan(contains("Storing"));
+  }
+
+  @Test
+  public void testDeserializationTracing() throws Exception {
+    DatastoreSession session = new DatastoreSession(manager);
+    session.setValid(true);
+    session.setId(keyId);
+    DatastoreStore storeSpy = spy(store);
+
+    Entity entity = session.saveMetadataToEntity(key)
+        .set("attributes", session.saveAttributesToEntity(keyFactory).stream()
+            .map(EntityValue::of)
+            .collect(Collectors.toList()))
+        .build();
+
+    when(datastore.get(any(Key.class))).thenReturn(entity);
+    storeSpy.load(keyId);
+    verify(storeSpy).startSpan(contains("Loading"));
+    verify(storeSpy).startSpan(contains("Deserialization"));
+  }
+
+
+  @Test
+  public void testTracerActivation() throws Exception {
+    store.setTraceRequest(false);
+    assertNull(store.startSpan("span"));
+
+    store.setTraceRequest(true);
+    assertNotNull(store.startSpan("span"));
+  }
 
   /**
    * This is an helper class to mock the return of Datastore queries.
