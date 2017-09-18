@@ -5,5 +5,5 @@
          namespace="${gcp.distributed-sessions.namespace}"
          sessionKind="${gcp.distributed-sessions.sessionKind}"
          traceRequest="${gcp.distributed-sessions.enableTrace}"
-         useUniqueEntity="${gcp.distributed-sessions.useUniqueEntity}"/>
+         separateAttributes="${gcp.distributed-sessions.separateAttributes}"/>
 </Manager>
