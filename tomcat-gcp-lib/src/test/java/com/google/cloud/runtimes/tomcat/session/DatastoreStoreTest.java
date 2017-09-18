@@ -286,7 +286,7 @@ public class DatastoreStoreTest {
         attributeKeyFactory);
 
     // Load the session and remove the map attribute
-    when(datastore.<FullEntity>run(any(Query.class))).thenReturn(
+    when(datastore.<FullEntity>run(any())).thenReturn(
         new IteratorQueryResults<>(initialSessionEntities.iterator()));
     DatastoreSession session = (DatastoreSession)store.load(keyId);
     session.getSession().setAttribute("map", null);
