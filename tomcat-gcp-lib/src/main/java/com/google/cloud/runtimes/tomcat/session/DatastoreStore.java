@@ -33,6 +33,7 @@ import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.io.IOException;
@@ -42,7 +43,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Session;
@@ -83,7 +83,7 @@ public class DatastoreStore extends StoreBase {
    * If true the session attributes are in the same entity as the session metadata, otherwise,
    * each attribute is saved in a distinct entity.
    */
-  private boolean useUniqueEntity = true;
+  private boolean separateAttributes = false;
 
   /**
    * Whether or not to send traces to Stackdriver for the operations related to session persistence.
@@ -191,13 +191,7 @@ public class DatastoreStore extends StoreBase {
     Entity sessionEntity = null;
     List<FullEntity> attributeEntities = new LinkedList<>();
 
-    if (useUniqueEntity) {
-      sessionEntity = datastore.get(sessionKey);
-      if (sessionEntity != null && sessionEntity.contains("attributes")) {
-        sessionEntity.<EntityValue>getList("attributes")
-            .forEach(val -> attributeEntities.add(val.get()));
-      }
-    } else {
+    if (separateAttributes) {
       Iterator<Entity> entities = datastore.run(Query.newEntityQueryBuilder()
           .setKind(sessionKind)
           .setFilter(PropertyFilter.hasAncestor(sessionKey))
@@ -210,6 +204,12 @@ public class DatastoreStore extends StoreBase {
         } else {
           attributeEntities.add(entity);
         }
+      }
+    } else {
+      sessionEntity = datastore.get(sessionKey);
+      if (sessionEntity != null && sessionEntity.contains("attributes")) {
+        sessionEntity.<EntityValue>getList("attributes")
+            .forEach(val -> attributeEntities.add(val.get()));
       }
     }
     endSpan(loadingSessionContext);
@@ -296,14 +296,11 @@ public class DatastoreStore extends StoreBase {
 
     Builder sessionEntity = session.saveMetadataToEntity(sessionKey);
     List<FullEntity> attributes = session.saveAttributesToEntity(attributeKeyFactory,
-        useUniqueEntity);
-    if (useUniqueEntity) {
-      // Embed all the attributes into the session entity.
-      sessionEntity.set("attributes",
-          attributes.stream().map(EntityValue::of).collect(Collectors.toList())
-      );
-    } else {
+        separateAttributes);
+    if (separateAttributes) {
       entities.addAll(attributes);
+    } else {
+      sessionEntity.set("attributes", Lists.transform(attributes, EntityValue::of));
     }
     entities.add(sessionEntity.build());
     endSpan(serializationContext);
@@ -320,17 +317,17 @@ public class DatastoreStore extends StoreBase {
 
     QueryResults<Key> keys = datastore.run(query);
 
-    if (useUniqueEntity) {
-      datastore.delete(Streams.stream(keys).toArray(Key[]::new));
-    } else {
+    if (separateAttributes) {
       Stream<Key> toDelete = Streams.stream(keys)
-            .parallel()
-            .flatMap(key ->
-                Streams.stream(datastore.run(keyQueryBuilder
+          .parallel()
+          .flatMap(key ->
+              Streams.stream(datastore.run(keyQueryBuilder
                   .setFilter(PropertyFilter.hasAncestor(key))
                   .build()))
-            );
+          );
       datastore.delete(toDelete.toArray(Key[]::new));
+    } else {
+      datastore.delete(Streams.stream(keys).toArray(Key[]::new));
     }
   }
 
@@ -377,8 +374,8 @@ public class DatastoreStore extends StoreBase {
   /**
    * This property will be injected by Tomcat on startup.
    */
-  public void setUseUniqueEntity(boolean useUniqueEntity) {
-    this.useUniqueEntity = useUniqueEntity;
+  public void setSeparateAttributes(boolean separateAttributes) {
+    this.separateAttributes = separateAttributes;
   }
 
   @VisibleForTesting

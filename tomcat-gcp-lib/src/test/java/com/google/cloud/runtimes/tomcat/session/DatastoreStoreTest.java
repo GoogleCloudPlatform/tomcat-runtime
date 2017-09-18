@@ -125,7 +125,7 @@ public class DatastoreStoreTest {
 
     Entity sessionEntity = session
         .saveMetadataToEntity(key)
-        .set("attributes", session.saveAttributesToEntity(keyFactory, true).stream()
+        .set("attributes", session.saveAttributesToEntity(keyFactory, false).stream()
             .map(EntityValue::of)
             .collect(Collectors.toList()))
         .build();
@@ -163,7 +163,7 @@ public class DatastoreStoreTest {
 
   @Test
   public void testDecomposedSessionExpiration() throws Exception {
-    store.setUseUniqueEntity(false);
+    store.setSeparateAttributes(true);
     Key attributeKey = keyFactory.newKey("attribute");
 
     when(datastore.<Query<Key>>run(any(Query.class))).thenReturn(
@@ -199,7 +199,7 @@ public class DatastoreStoreTest {
     session.setId(keyId);
     session.setAttribute("count", 5);
 
-    store.setUseUniqueEntity(false);
+    store.setSeparateAttributes(true);
     store.save(session);
 
     ArgumentCaptor entities = ArgumentCaptor.forClass(Entity.class);
@@ -221,13 +221,13 @@ public class DatastoreStoreTest {
     session.setAttribute("count", 2);
     session.setAttribute("map", Collections.singletonMap("key", "value"));
 
-    List<FullEntity> entites = session.saveAttributesToEntity(keyFactory, false);
+    List<FullEntity> entites = session.saveAttributesToEntity(keyFactory, true);
     entites.add(session.saveMetadataToEntity(key).build());
 
     QueryResults<FullEntity> queryResults = new IteratorQueryResults<>(entites.iterator());
     when(datastore.<FullEntity>run(any())).thenReturn(queryResults);
 
-    store.setUseUniqueEntity(false);
+    store.setSeparateAttributes(true);
     Session restored = store.load(keyId);
 
     assertEquals(keyId, restored.getId());
@@ -257,7 +257,7 @@ public class DatastoreStoreTest {
     DatastoreStore storeSpy = spy(store);
 
     Entity entity = session.saveMetadataToEntity(key)
-        .set("attributes", session.saveAttributesToEntity(keyFactory, true).stream()
+        .set("attributes", session.saveAttributesToEntity(keyFactory, false).stream()
             .map(EntityValue::of)
             .collect(Collectors.toList()))
         .build();
@@ -270,7 +270,7 @@ public class DatastoreStoreTest {
 
   @Test
   public void testSerializationCycleWithAttributeRemoval() throws Exception {
-    store.setUseUniqueEntity(false);
+    store.setSeparateAttributes(true);
     DatastoreSession initialSession = new DatastoreSession(manager);
     initialSession.setValid(true);
     initialSession.setId(keyId);

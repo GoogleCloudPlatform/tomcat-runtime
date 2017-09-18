@@ -96,7 +96,7 @@ public class DatastoreSessionTest {
     session.setAttribute("map", new HashMap<>());
 
     KeyFactory factory = new KeyFactory("project").setKind("kind");
-    List<FullEntity> entities = session.saveAttributesToEntity(factory, true);
+    List<FullEntity> entities = session.saveAttributesToEntity(factory, false);
 
     assertTrue(entities.stream()
         .map(entity -> (Key)entity.getKey())
@@ -113,7 +113,7 @@ public class DatastoreSessionTest {
     initialSession.setAttribute("map", Collections.singletonMap("key", "value"));
 
     KeyFactory keyFactory = new KeyFactory("project").setKind("kind");
-    List<FullEntity> attributes = initialSession.saveAttributesToEntity(keyFactory, true);
+    List<FullEntity> attributes = initialSession.saveAttributesToEntity(keyFactory, false);
     Entity.Builder metadata = initialSession.saveMetadataToEntity(sessionKey);
 
     DatastoreSession restoredSession = new DatastoreSession(sessionManager);

@@ -137,11 +137,11 @@ public class DatastoreSession extends StandardSession {
    * @throws IOException If an error occur during the serialization.
    */
   public List<FullEntity> saveAttributesToEntity(KeyFactory attributeKeyFactory,
-      boolean useUniqueEntity) throws
+      boolean separateAttributes) throws
       IOException {
     Stream<String> attributesStream = Collections.list(getAttributeNames()).stream();
 
-    if (!useUniqueEntity) {
+    if (separateAttributes) {
       attributesStream = attributesStream.filter(name -> accessedAttributes.contains(name));
     }
 
