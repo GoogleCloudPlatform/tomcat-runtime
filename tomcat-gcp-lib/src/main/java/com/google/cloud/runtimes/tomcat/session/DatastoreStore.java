@@ -178,10 +178,10 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * Create a new session usable by Tomcat from a session serialized in a Datastore Entity.
-   * @param sessionKey The key associated to the session metadata and its attributes.
+   * Create a new session usable by Tomcat from a serialized session in a Datastore Entity.
+   * @param sessionKey The key associated with the session metadata and attributes.
    * @return A new session containing the metadata and attributes stored into the entity.
-   * @throws ClassNotFoundException Thrown if the class serialized in the entity is not available in
+   * @throws ClassNotFoundException Thrown if a class serialized in the entity is not available in
    *                                this context.
    * @throws IOException Thrown when an error occur during the deserialization.
    */
@@ -199,7 +199,7 @@ public class DatastoreStore extends StoreBase {
       }
     } else {
       Iterator<Entity> entities = datastore.run(Query.newEntityQueryBuilder()
-          .setKind(getAttributesKind())
+          .setKind(sessionKind)
           .setFilter(PropertyFilter.hasAncestor(sessionKey))
           .build());
 
@@ -267,11 +267,18 @@ public class DatastoreStore extends StoreBase {
           "The session must be an instance of DatastoreSession to be serialized");
     }
     DatastoreSession datastoreSession = (DatastoreSession) session;
+    Key sessionKey = sessionKeyFactory.newKey(session.getId());
+    KeyFactory attributeKeyFactory = datastore.newKeyFactory()
+        .setKind(getAttributesKind())
+        .addAncestor(PathElement.of(sessionKind, sessionKey.getName()));
 
-    List<FullEntity> entities = serializeSession(datastoreSession);
+    List<FullEntity> entities = serializeSession(datastoreSession, sessionKey, attributeKeyFactory);
 
     TraceContext datastoreSaveContext = startSpan("Storing the session in the Datastore");
     datastore.put(entities.toArray(new FullEntity[0]));
+    datastore.delete(datastoreSession.getSuppressedAttributes().stream()
+        .map(attributeKeyFactory::newKey)
+        .toArray(Key[]::new));
     endSpan(datastoreSaveContext);
   }
 
@@ -281,20 +288,17 @@ public class DatastoreStore extends StoreBase {
    * @return A list of one or more entities containing the session and its attributes.
    * @throws IOException If the session cannot be serialized.
    */
-  private List<FullEntity> serializeSession(DatastoreSession session)
-      throws IOException {
-    TraceContext serializationContext = startSpan("Serialization of the session");
+  @VisibleForTesting
+  List<FullEntity> serializeSession(DatastoreSession session, Key sessionKey,
+      KeyFactory attributeKeyFactory) throws IOException {
+    final TraceContext serializationContext = startSpan("Serialization of the session");
     List<FullEntity> entities = new ArrayList<>();
-    Key sessionKey = sessionKeyFactory.newKey(session.getId());
-    KeyFactory attributeKeyFactory = datastore.newKeyFactory()
-        .setKind(getAttributesKind())
-        .addAncestor(PathElement.of(sessionKind, sessionKey.getName()));
 
     Builder sessionEntity = session.saveMetadataToEntity(sessionKey);
-    List<FullEntity> attributes = session.saveAttributesToEntity(attributeKeyFactory);
-
+    List<FullEntity> attributes = session.saveAttributesToEntity(attributeKeyFactory,
+        useUniqueEntity);
     if (useUniqueEntity) {
-      // Embed all the attributes entities into the session entity.
+      // Embed all the attributes into the session entity.
       sessionEntity.set("attributes",
           attributes.stream().map(EntityValue::of).collect(Collectors.toList())
       );
