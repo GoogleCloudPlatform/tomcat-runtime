@@ -54,11 +54,14 @@ public class SessionServlet extends HttpServlet {
     Map<String, Object> map = new HashMap<>();
     map.put("First test", Arrays.asList(1,2,3,4,5));
     map.put("Second arguments", DoubleStream.generate(() -> Math.random() * 10000)
-        .limit(500)
+        .limit(5000)
         .toArray());
 
-    req.getSession().setAttribute("map", map);
     req.getSession().setAttribute("count", count);
+    if (Math.random() > 0.7) {
+      resp.getWriter().println("Modified map");
+      req.getSession().setAttribute("map", map);
+    }
   }
 
 }

@@ -30,7 +30,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.catalina.Manager;
@@ -39,6 +41,9 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 public class DatastoreSession extends StandardSession {
+
+  protected Set<String> accessedAttributes;
+  protected Set<String> initialAttributes;
 
   @VisibleForTesting
   enum SessionMetadata {
@@ -64,8 +69,14 @@ public class DatastoreSession extends StandardSession {
 
   private static final Log log = LogFactory.getLog(DatastoreSession.class);
 
+  /**
+   * Create a new session which can be stored in the Datastore.
+   * @param manager The session manager which manage this session.
+   */
   public DatastoreSession(Manager manager) {
     super(manager);
+    this.accessedAttributes = new HashSet<>();
+    this.initialAttributes = new HashSet<>();
   }
 
   /**
@@ -93,9 +104,10 @@ public class DatastoreSession extends StandardSession {
       try (InputStream fis = value.asInputStream();
           ObjectInputStream ois = new ObjectInputStream(fis)) {
         Object attribute = ois.readObject();
-        setAttribute(name, attribute);
+        setAttribute(name, attribute, false);
       }
     }
+    initialAttributes.addAll(Collections.list(getAttributeNames()));
   }
 
   /**
@@ -128,11 +140,16 @@ public class DatastoreSession extends StandardSession {
              and the property `value` to the serialized attribute.
    * @throws IOException If an error occur during the serialization.
    */
-  public List<FullEntity> saveAttributesToEntity(KeyFactory attributeKeyFactory) throws
+  public List<FullEntity> saveAttributesToEntity(KeyFactory attributeKeyFactory,
+      boolean useUniqueEntity) throws
       IOException {
-    Stream<FullEntity> entities = Collections
-        .list(getAttributeNames())
-        .stream()
+    Stream<String> attributesStream = Collections.list(getAttributeNames()).stream();
+
+    if (!useUniqueEntity) {
+      attributesStream = attributesStream.filter(name -> accessedAttributes.contains(name));
+    }
+
+    Stream<FullEntity> entities = attributesStream
         .filter(name -> isAttributeDistributable(name, getAttribute(name)))
         .map(name -> serializeAttribute(attributeKeyFactory, name));
 
@@ -166,4 +183,27 @@ public class DatastoreSession extends StandardSession {
         .build();
   }
 
+  /**
+   * List the attributes that were loaded from the Datastore and suppressed during the execution.
+   * @return A set of the suppressed attributes.
+   */
+  public Set<String> getSuppressedAttributes() {
+    Set<String> suppressedAttribute = new HashSet<>(initialAttributes);
+    suppressedAttribute.removeAll(Collections.list(getAttributeNames()));
+    return suppressedAttribute;
+  }
+
+  @Override
+  public Object getAttribute(String name) {
+    accessedAttributes.add(name);
+    return super.getAttribute(name);
+  }
+
+  @Override
+  public void setAttribute(String name, Object value, boolean notify) {
+    super.setAttribute(name, value, notify);
+    if (notify) {
+      accessedAttributes.add(name);
+    }
+  }
 }

@@ -18,15 +18,14 @@ package com.google.cloud.runtimes.tomcat.session;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
@@ -34,32 +33,24 @@ import com.google.cloud.datastore.EntityValue;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.session.StandardSession;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 /**
@@ -92,14 +83,14 @@ public class DatastoreStoreTest {
     keyBuilder = Query.newKeyQueryBuilder().setKind("kind");
     QueryResults<Key> keyQueryResults = new IteratorQueryResults<>(ImmutableList.of(key).iterator());
 
-    when(datastore.newKeyFactory()).thenReturn(keyFactory);
+    when(datastore.newKeyFactory()).thenReturn(new KeyFactory("project"));
     when(datastore.<Key>run(any(Query.class))).thenReturn(keyQueryResults);
     when(manager.getContext()).thenReturn(new StandardContext());
     when(manager.willAttributeDistribute(anyString(), any())).thenReturn(true);
     when(manager.createEmptySession()).thenReturn(new DatastoreSession(manager));
 
     store.setDatastore(datastore);
-    store.setSessionKeyFactory(keyFactory.setKind("kind"));
+    store.setSessionKeyFactory(keyFactory);
     store.setKeyQueryBuilder(keyBuilder);
     store.setSessionKind("kind");
     store.setManager(manager);
@@ -135,7 +126,7 @@ public class DatastoreStoreTest {
 
     Entity sessionEntity = session
         .saveMetadataToEntity(key)
-        .set("attributes", session.saveAttributesToEntity(keyFactory).stream()
+        .set("attributes", session.saveAttributesToEntity(keyFactory, true).stream()
             .map(EntityValue::of)
             .collect(Collectors.toList()))
         .build();
@@ -195,7 +186,7 @@ public class DatastoreStoreTest {
     store.save(session);
     ArgumentCaptor entity = ArgumentCaptor.forClass(Entity.class);
     verify(datastore).put((FullEntity<?>[]) entity.capture());
-    verify(session).saveAttributesToEntity(any());
+    verify(session).saveAttributesToEntity(any(), anyBoolean());
 
     assertNotNull(entity.getValue());
     assertEquals(entity.getValue().getClass(), Entity.class);
@@ -231,7 +222,7 @@ public class DatastoreStoreTest {
     session.setAttribute("count", 2);
     session.setAttribute("map", Collections.singletonMap("key", "value"));
 
-    List<FullEntity> entites = session.saveAttributesToEntity(keyFactory);
+    List<FullEntity> entites = session.saveAttributesToEntity(keyFactory, false);
     entites.add(session.saveMetadataToEntity(key).build());
 
     QueryResults<FullEntity> queryResults = new IteratorQueryResults<>(entites.iterator());
@@ -267,7 +258,7 @@ public class DatastoreStoreTest {
     DatastoreStore storeSpy = spy(store);
 
     Entity entity = session.saveMetadataToEntity(key)
-        .set("attributes", session.saveAttributesToEntity(keyFactory).stream()
+        .set("attributes", session.saveAttributesToEntity(keyFactory, true).stream()
             .map(EntityValue::of)
             .collect(Collectors.toList()))
         .build();
@@ -276,6 +267,37 @@ public class DatastoreStoreTest {
     storeSpy.load(keyId);
     verify(storeSpy).startSpan(contains("Loading"));
     verify(storeSpy).startSpan(contains("Deserialization"));
+  }
+
+  @Test
+  public void testSerializationCycleWithAttributeRemoval() throws Exception {
+    store.setUseUniqueEntity(false);
+    DatastoreSession initialSession = new DatastoreSession(manager);
+    initialSession.setValid(true);
+    initialSession.setId(keyId);
+    initialSession.setAttribute("count", 5);
+    initialSession.setAttribute("map", Collections.singletonMap("key", "value"));
+    KeyFactory attributeKeyFactory = datastore.newKeyFactory()
+        .setKind("kind")
+        .addAncestor(PathElement.of("kind", key.getName()));
+
+    List<FullEntity> initialSessionEntities = store.serializeSession(initialSession, key,
+        attributeKeyFactory);
+
+    // Load the session and remove the map attribute
+    when(datastore.<FullEntity>run(any(Query.class))).thenReturn(
+        new IteratorQueryResults<>(initialSessionEntities.iterator()));
+    DatastoreSession session = (DatastoreSession)store.load(keyId);
+    session.getSession().setAttribute("map", null);
+
+    // Save and reload the session to ensure that the attribute map is not serialized
+    store.save(session);
+
+    ArgumentCaptor<Key> keyCaptors = ArgumentCaptor.forClass(Key.class);
+    verify(datastore).delete(keyCaptors.capture());
+
+    assertNotNull(keyCaptors.getValue());
+    assertEquals("map", keyCaptors.getValue().getName());
   }
 
 
