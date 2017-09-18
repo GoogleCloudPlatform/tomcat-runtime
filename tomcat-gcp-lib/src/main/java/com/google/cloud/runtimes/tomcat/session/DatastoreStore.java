@@ -178,19 +178,19 @@ public class DatastoreStore extends StoreBase {
   }
 
   /**
-   * Create a new session usable by Tomcat from a serialized session in a Datastore Entity.
+   * Create a new session usable by Tomcat, from a serialized session in a Datastore Entity.
    * @param sessionKey The key associated with the session metadata and attributes.
-   * @return A new session containing the metadata and attributes stored into the entity.
+   * @return A new session containing the metadata and attributes stored in the entity.
    * @throws ClassNotFoundException Thrown if a class serialized in the entity is not available in
    *                                this context.
    * @throws IOException Thrown when an error occur during the deserialization.
    */
   private DatastoreSession deserializeSession(Key sessionKey)
       throws ClassNotFoundException, IOException {
-
-    TraceContext sessionFetchingContext = startSpan("Loading the session from Datastore");
+    TraceContext loadingSessionContext = startSpan("Loading the session from Datastore");
     Entity sessionEntity = null;
     List<FullEntity> attributeEntities = new LinkedList<>();
+
     if (useUniqueEntity) {
       sessionEntity = datastore.get(sessionKey);
       if (sessionEntity != null && sessionEntity.contains("attributes")) {
@@ -212,7 +212,7 @@ public class DatastoreStore extends StoreBase {
         }
       }
     }
-    endSpan(sessionFetchingContext);
+    endSpan(loadingSessionContext);
 
     DatastoreSession session = null;
     if (sessionEntity != null) {

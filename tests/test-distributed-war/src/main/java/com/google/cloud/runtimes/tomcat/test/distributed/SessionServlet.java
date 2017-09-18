@@ -52,8 +52,8 @@ public class SessionServlet extends HttpServlet {
     }
 
     Map<String, Object> map = new HashMap<>();
-    map.put("First test", Arrays.asList(1,2,3,4,5));
-    map.put("Second arguments", DoubleStream.generate(() -> Math.random() * 10000)
+    map.put("First entry", Arrays.asList(1,2,3,4,5));
+    map.put("Second entry", DoubleStream.generate(() -> Math.random() * 10000)
         .limit(5000)
         .toArray());
 

@@ -83,8 +83,8 @@ public class DatastoreSession extends StandardSession {
    * Restore the attributes and metadata of the session from Datastore Entities.
    *
    * @param metadata An entity containing the metadata of the session.
-   * @param attributes An iterator of entity containing the name of each attribute and value
-   *                   serialized.
+   * @param attributes An iterator of entity, containing the name and serialized content of each
+   *                   attribute.
    * @throws ClassNotFoundException The class in attempt to be deserialized is not present in the
    *                                application.
    * @throws IOException Error during the deserialization of the object.
