@@ -98,11 +98,11 @@ public class DatastoreSessionTest {
     KeyFactory factory = new KeyFactory("project").setKind("kind");
     List<FullEntity> entities = session.saveAttributesToEntity(factory, true);
 
-    entities.stream()
+    assertTrue(entities.stream()
         .map(entity -> (Key)entity.getKey())
         .map(key -> key.getName())
         .collect(Collectors.toSet())
-        .containsAll(Arrays.asList("count", "map"));
+        .containsAll(Arrays.asList("count", "map")));
   }
 
   @Test

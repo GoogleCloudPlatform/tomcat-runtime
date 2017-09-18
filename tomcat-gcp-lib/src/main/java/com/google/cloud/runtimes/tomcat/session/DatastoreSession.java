@@ -37,8 +37,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.StandardSession;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 
 public class DatastoreSession extends StandardSession {
 
@@ -66,8 +64,6 @@ public class DatastoreSession extends StandardSession {
       return value;
     }
   }
-
-  private static final Log log = LogFactory.getLog(DatastoreSession.class);
 
   /**
    * Create a new session which can be stored in the Datastore.
