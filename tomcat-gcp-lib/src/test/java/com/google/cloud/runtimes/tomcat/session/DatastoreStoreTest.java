@@ -71,8 +71,6 @@ public class DatastoreStoreTest {
 
   private DatastoreStore store;
 
-  private StructuredQuery.Builder<Key> keyBuilder;
-
   private static final String keyId = "123";
 
   @Before
@@ -81,7 +79,7 @@ public class DatastoreStoreTest {
     store = new DatastoreStore();
     keyFactory = new KeyFactory("project").setKind("kind");
     key = keyFactory.newKey(keyId);
-    keyBuilder = Query.newKeyQueryBuilder().setKind("kind");
+    StructuredQuery.Builder<Key> keyBuilder = Query.newKeyQueryBuilder().setKind("kind");
     QueryResults<Key> keyQueryResults = new IteratorQueryResults<>(ImmutableList.of(key).iterator());
 
     when(datastore.newKeyFactory()).thenReturn(new KeyFactory("project"));

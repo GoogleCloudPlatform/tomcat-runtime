@@ -334,6 +334,7 @@ public class DatastoreStore extends StoreBase {
     }
   }
 
+  @VisibleForTesting
   TraceContext startSpan(String spanName) {
     if (traceRequest) {
       Tracer tracer = Trace.getTracer();
@@ -343,6 +344,7 @@ public class DatastoreStore extends StoreBase {
     }
   }
 
+  @VisibleForTesting
   private void endSpan(TraceContext context) {
     if (context != null) {
       Tracer tracer = Trace.getTracer();
