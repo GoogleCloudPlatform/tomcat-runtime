@@ -269,7 +269,7 @@ public class DatastoreStore extends StoreBase {
     DatastoreSession datastoreSession = (DatastoreSession) session;
     Key sessionKey = sessionKeyFactory.newKey(session.getId());
     KeyFactory attributeKeyFactory = datastore.newKeyFactory()
-        .setKind(getAttributesKind())
+        .setKind(sessionKind)
         .addAncestor(PathElement.of(sessionKind, sessionKey.getName()));
 
     List<FullEntity> entities = serializeSession(datastoreSession, sessionKey, attributeKeyFactory);
@@ -291,7 +291,7 @@ public class DatastoreStore extends StoreBase {
   @VisibleForTesting
   List<FullEntity> serializeSession(DatastoreSession session, Key sessionKey,
       KeyFactory attributeKeyFactory) throws IOException {
-    final TraceContext serializationContext = startSpan("Serialization of the session");
+    TraceContext serializationContext = startSpan("Serialization of the session");
     List<FullEntity> entities = new ArrayList<>();
 
     Builder sessionEntity = session.saveMetadataToEntity(sessionKey);
@@ -336,12 +336,11 @@ public class DatastoreStore extends StoreBase {
 
   @VisibleForTesting
   TraceContext startSpan(String spanName) {
+    TraceContext context = null;
     if (traceRequest) {
-      Tracer tracer = Trace.getTracer();
-      return tracer.startSpan(spanName);
-    } else {
-      return null;
+      context = Trace.getTracer().startSpan(spanName);
     }
+    return context;
   }
 
   @VisibleForTesting
@@ -350,10 +349,6 @@ public class DatastoreStore extends StoreBase {
       Tracer tracer = Trace.getTracer();
       tracer.endSpan(context);
     }
-  }
-
-  private String getAttributesKind() {
-    return this.sessionKind;
   }
 
   /**
