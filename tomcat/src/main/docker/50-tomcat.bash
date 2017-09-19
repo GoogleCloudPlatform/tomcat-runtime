@@ -17,6 +17,7 @@ fi
 
 # Add all the user defined properties to catalina.properties
 if [ -n "$TOMCAT_PROPERTIES" ]; then
+  echo >> ${CATALINA_BASE}/conf/catalina.properties
   echo "$TOMCAT_PROPERTIES" | tr ',' '\n' | while read property; do
     echo ${property} >> ${CATALINA_BASE}/conf/catalina.properties
   done

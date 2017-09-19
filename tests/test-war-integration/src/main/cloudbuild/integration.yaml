@@ -3,7 +3,7 @@
 steps:
   # Runtimes-common integration tests
   # See https://github.com/GoogleCloudPlatform/runtimes-common/tree/master/integration_tests
-  - name: 'gcr.io/gcp-runtimes/integration_test:2017-08-24-142154'
+  - name: 'gcr.io/gcp-runtimes/integration_test:2017-09-18-104536'
     args:
       - '--url=${_DEPLOYED_APP_URL}'
       - '--verbose'
