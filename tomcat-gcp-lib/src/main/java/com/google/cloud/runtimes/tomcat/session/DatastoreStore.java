@@ -16,28 +16,32 @@
 
 package com.google.cloud.runtimes.tomcat.session;
 
-import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.DatastoreOptions;
 import com.google.cloud.datastore.Entity;
+import com.google.cloud.datastore.EntityValue;
+import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.trace.Trace;
+import com.google.cloud.trace.Tracer;
+import com.google.cloud.trace.core.TraceContext;
 import com.google.common.collect.Streams;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Session;
-import org.apache.catalina.session.StandardSession;
 import org.apache.catalina.session.StoreBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
@@ -58,7 +62,7 @@ public class DatastoreStore extends StoreBase {
   private static final Log log = LogFactory.getLog(DatastoreStore.class);
 
   private Datastore datastore = null;
-  private KeyFactory keyFactory = null;
+  private KeyFactory sessionKeyFactory = null;
   private StructuredQuery.Builder<Key> keyQueryBuilder = null;
 
   /**
@@ -71,6 +75,10 @@ public class DatastoreStore extends StoreBase {
    */
   private String namespace;
 
+  private boolean useUniqueEntity = true;
+
+  private boolean traceRequest = true;
+
   /**
    * {@inheritDoc}
    *
@@ -82,7 +90,7 @@ public class DatastoreStore extends StoreBase {
     log.debug("Initialization of the Datastore Store");
 
     this.datastore = DatastoreOptions.newBuilder().setNamespace(namespace).build().getService();
-    this.keyFactory = datastore.newKeyFactory().setKind(sessionKind);
+    this.sessionKeyFactory = datastore.newKeyFactory().setKind(sessionKind);
     this.keyQueryBuilder = Query.newKeyQueryBuilder().setKind(sessionKind);
 
     super.startInternal();
@@ -150,17 +158,36 @@ public class DatastoreStore extends StoreBase {
   @Override
   public Session load(String id) throws ClassNotFoundException, IOException {
     log.debug("Session " + id + " requested");
-    StandardSession session = null;
 
-    Entity sessionEntity = datastore.get(keyFactory.newKey(id));
+    TraceContext metadataContext = startSpan("Load metadata from Datastore");
+    Key sessionKey = sessionKeyFactory.newKey(id);
+    Entity sessionEntity = datastore.get(sessionKey);
+    endSpan(metadataContext);
+
+    DatastoreSession session = null;
 
     if (sessionEntity != null) {
-      try (InputStream fis = sessionEntity.getBlob("content").asInputStream();
-          ObjectInputStream ois = getObjectInputStream(fis)) {
-        session = (StandardSession) manager.createEmptySession();
-        session.readObjectData(ois);
-        session.setManager(manager);
+      TraceContext entitiesContext = startSpan("Load attributes from Datastore");
+      List<FullEntity> attributeEntities = new LinkedList<>();
+      if (useUniqueEntity) {
+        if (sessionEntity.contains("attributes")) {
+          sessionEntity.<EntityValue>getList("attributes")
+              .forEach(val -> attributeEntities.add(val.get()));
+        }
+      } else {
+        datastore.run(Query.newEntityQueryBuilder()
+            .setKind(getAttributesKind())
+            .setFilter(PropertyFilter.hasAncestor(sessionKey))
+            .build())
+            .forEachRemaining(attributeEntities::add);
       }
+      endSpan(entitiesContext);
+
+      session = (DatastoreSession) manager.createEmptySession();
+      TraceContext deserializationContext = startSpan("Deserialization of the session");
+      session.restoreFromEntities(sessionEntity, attributeEntities);
+      endSpan(deserializationContext);
+      session.setId(id);
     }
 
     log.debug("Session " + id + " loaded");
@@ -176,7 +203,7 @@ public class DatastoreStore extends StoreBase {
   @Override
   public void remove(String id) {
     log.debug("Removing session: " + id);
-    datastore.delete(keyFactory.newKey(id));
+    datastore.delete(sessionKeyFactory.newKey(id));
   }
 
   /**
@@ -186,7 +213,7 @@ public class DatastoreStore extends StoreBase {
   public void clear() throws IOException {
     log.debug("Deleting all sessions");
     datastore.delete(Arrays.stream(keys())
-                           .map(keyFactory::newKey)
+                           .map(sessionKeyFactory::newKey)
                            .toArray(Key[]::new));
   }
 
@@ -204,27 +231,36 @@ public class DatastoreStore extends StoreBase {
   public void save(Session session) throws IOException {
     log.debug("Persisting session: " + session.getId());
 
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    if (!(session instanceof DatastoreSession)) {
+      throw new IOException(
+          "The session must be an instance of DatastoreSession to be serialized");
+    }
+    DatastoreSession datastoreSession = (DatastoreSession) session;
 
-    try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-      if (!(session instanceof StandardSession)) {
-        throw new IOException(
-            "The session must be an instance of StandardSession to be serialized");
-      }
-      ((StandardSession) session).writeObjectData(oos);
+    Key sessionKey = sessionKeyFactory.newKey(session.getId());
+    KeyFactory attributeKeyFactory = datastore.newKeyFactory()
+        .setKind(getAttributesKind())
+        .addAncestor(PathElement.of(sessionKind, sessionKey.getName()));
+
+    List<FullEntity> entities = new ArrayList<>();
+
+    TraceContext serializationContext = startSpan("Serialization of the session");
+    Entity.Builder sessionEntity = datastoreSession.saveMetadataToEntity(sessionKey);
+    List<FullEntity> attributes = datastoreSession.saveAttributesToEntity(attributeKeyFactory);
+    if (useUniqueEntity) {
+      sessionEntity.set("attributes", attributes.stream()
+          .map(EntityValue::of).collect(Collectors.toList()));
+    } else {
+      entities.addAll(attributes);
     }
 
-    Entity.Builder sessionEntity = Entity.newBuilder(keyFactory.newKey(session.getId()))
-        .set("content", Blob.copyFrom(bos.toByteArray()))
-        .set("lastAccess", session.getLastAccessedTime());
+    entities.add(sessionEntity.build());
 
-    // A negative time indicates that the session should never time out
-    if (session.getMaxInactiveInterval() >= 0) {
-      sessionEntity.set("expirationTime",
-          session.getLastAccessedTime() + session.getMaxInactiveInterval() * 1000);
-    }
+    endSpan(serializationContext);
 
-    datastore.put(sessionEntity.build());
+    TraceContext datastoreSaveContext = startSpan("Storing session");
+    datastore.put(entities.toArray(new FullEntity[0]));
+    endSpan(datastoreSaveContext);
   }
 
   @Override
@@ -236,7 +272,28 @@ public class DatastoreStore extends StoreBase {
         .build();
 
     QueryResults<Key> keys = datastore.run(query);
+
     datastore.delete(Streams.stream(keys).toArray(Key[]::new));
+  }
+
+  private TraceContext startSpan(String spanName) {
+    if (traceRequest) {
+      Tracer tracer = Trace.getTracer();
+      return tracer.startSpan(spanName);
+    } else {
+      return null;
+    }
+  }
+
+  private void endSpan(TraceContext context) {
+    if (context != null) {
+      Tracer tracer = Trace.getTracer();
+      tracer.endSpan(context);
+    }
+  }
+
+  private String getAttributesKind() {
+    return this.sessionKind;
   }
 
   /**
@@ -255,4 +312,10 @@ public class DatastoreStore extends StoreBase {
     this.sessionKind = sessionKind;
   }
 
+  /**
+   * This property will be injected by Tomcat on startup.
+   */
+  public void setTraceRequest(boolean traceRequest) {
+    this.traceRequest = traceRequest;
+  }
 }
