@@ -51,7 +51,7 @@ public class DatastoreSession extends StandardSession {
     IS_NEW("isNew"),
     IS_VALID("isValid"),
     THIS_ACCESSED_TIME("thisAccessedTime"),
-    EXPIRATION_TIME("expiration_time"),
+    EXPIRATION_TIME("expirationTime"),
     ATTRIBUTE_VALUE_NAME("value");
 
     private final String value;
