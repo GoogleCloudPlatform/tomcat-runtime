@@ -170,10 +170,12 @@ public class DatastoreStore extends StoreBase {
   @Override
   public Session load(String id) throws ClassNotFoundException, IOException {
     log.debug("Session " + id + " requested");
+    TraceContext context = startSpan("Loading session");
     Key sessionKey = sessionKeyFactory.newKey(id);
 
     DatastoreSession session = deserializeSession(sessionKey);
 
+    endSpan(context);
     log.debug("Session " + id + " loaded");
     return session;
   }
