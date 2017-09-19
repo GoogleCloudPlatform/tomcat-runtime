@@ -22,6 +22,7 @@ import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.Labels;
 import com.google.cloud.trace.core.SpanContext;
 import com.google.cloud.trace.core.SpanContextFactory;
+import com.google.cloud.trace.core.SpanContextHandle;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceGrpcApiService;
 import com.google.cloud.trace.service.TraceService;
@@ -70,6 +71,11 @@ public class TraceValve extends ValveBase {
   }
 
   @VisibleForTesting
+  TraceGrpcApiService.Builder getTraceService() {
+    return TraceGrpcApiService.builder();
+  }
+
+  @VisibleForTesting
   void initTraceService() throws LifecycleException {
 
     if (traceScheduledDelay != null && traceScheduledDelay <= 0) {
@@ -78,7 +84,7 @@ public class TraceValve extends ValveBase {
 
     try {
       String projectId = ServiceOptions.getDefaultProjectId();
-      TraceGrpcApiService.Builder traceServiceBuilder = TraceGrpcApiService.builder()
+      TraceGrpcApiService.Builder traceServiceBuilder = getTraceService()
           .setProjectId(projectId);
 
       if (traceScheduledDelay != null) {
@@ -86,11 +92,9 @@ public class TraceValve extends ValveBase {
       }
 
       traceService = traceServiceBuilder.build();
-
       Trace.init(traceService);
       log.info("Trace service initialized for project: " + projectId);
     } catch (IOException e) {
-      log.error("An error occurred during the initialization of the Trace valve", e);
       throw new LifecycleException(e);
     }
   }
@@ -104,13 +108,14 @@ public class TraceValve extends ValveBase {
   @Override
   public void invoke(Request request, Response response) throws IOException, ServletException {
     Tracer tracer = traceService.getTracer();
+    SpanContextHandle contextHandle = null;
 
     String traceHeader = request.getHeader(X_CLOUD_TRACE_HEADER);
     if (traceHeader != null) {
       SpanContext spanContext = traceService
           .getSpanContextFactory()
           .fromHeader(traceHeader);
-      traceService.getSpanContextHandler().attach(spanContext);
+      contextHandle = traceService.getSpanContextHandler().attach(spanContext);
       log.debug("Tracing request with header: " + request.getHeader(X_CLOUD_TRACE_HEADER));
     }
 
@@ -121,6 +126,10 @@ public class TraceValve extends ValveBase {
     tracer.annotateSpan(context, createLabels(request, response));
 
     tracer.endSpan(context);
+    if (contextHandle != null) {
+      contextHandle.detach();
+    }
+
   }
 
   /**

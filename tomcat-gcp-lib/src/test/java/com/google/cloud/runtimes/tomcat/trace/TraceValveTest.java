@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.matches;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,8 +31,12 @@ import com.google.cloud.trace.core.Label;
 import com.google.cloud.trace.core.Labels;
 import com.google.cloud.trace.core.SpanContext;
 import com.google.cloud.trace.core.SpanContextFactory;
+import com.google.cloud.trace.core.SpanContextHandle;
 import com.google.cloud.trace.core.TraceContext;
+import com.google.cloud.trace.service.TraceGrpcApiService;
+import com.google.cloud.trace.service.TraceGrpcApiService.Builder;
 import com.google.cloud.trace.service.TraceService;
+import java.io.IOException;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Valve;
 import org.apache.catalina.connector.Request;
@@ -128,6 +133,35 @@ public class TraceValveTest {
   public void testInvalidTraceDelay() throws Exception {
     valve.setTraceScheduledDelay(0);
     valve.initTraceService();
+  }
+
+  @Test
+  public void testServiceInitialization() throws Exception {
+    valve.setTraceScheduledDelay(60);
+    TraceValve spiedValve = spy(valve);
+    Builder builder = spy(TraceGrpcApiService.builder());
+    when(builder.build()).thenReturn(mock(TraceGrpcApiService.class));
+    when(spiedValve.getTraceService()).thenReturn(builder);
+    spiedValve.initTraceService();
+  }
+
+  @Test(expected = LifecycleException.class)
+  public void testServiceInitializationError() throws Exception {
+    valve.setTraceScheduledDelay(60);
+    TraceValve spiedValve = spy(valve);
+    Builder builder = spy(TraceGrpcApiService.builder());
+    when(builder.build()).thenThrow(new IOException());
+    when(spiedValve.getTraceService()).thenReturn(builder);
+    spiedValve.initTraceService();
+  }
+
+  @Test
+  public void testThatSpanHandleIsDetached() throws Exception {
+    when(request.getHeader(anyString())).thenReturn("");
+    SpanContextHandle contextHandle = mock(SpanContextHandle.class);
+    when(traceService.getSpanContextHandler().attach(any())).thenReturn(contextHandle);
+    valve.invoke(request, response);
+    verify(contextHandle).detach();
   }
 
 }
