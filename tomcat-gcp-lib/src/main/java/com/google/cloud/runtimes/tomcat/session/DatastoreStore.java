@@ -29,6 +29,7 @@ import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import com.google.cloud.runtimes.tomcat.session.DatastoreSession.SessionMetadata;
 import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.TraceContext;
@@ -311,8 +312,9 @@ public class DatastoreStore extends StoreBase {
   public void processExpires() {
     log.debug("Processing expired sessions");
 
-    Query<Key> query = keyQueryBuilder
-        .setFilter(PropertyFilter.le("expirationTime", System.currentTimeMillis()))
+    Query<Key> query = Query.newKeyQueryBuilder().setKind(sessionKind)
+        .setFilter(PropertyFilter.le(SessionMetadata.EXPIRATION_TIME.getValue(),
+            System.currentTimeMillis()))
         .build();
 
     QueryResults<Key> keys = datastore.run(query);
@@ -320,11 +322,10 @@ public class DatastoreStore extends StoreBase {
     if (separateAttributes) {
       Stream<Key> toDelete = Streams.stream(keys)
           .parallel()
-          .flatMap(key ->
-              Streams.stream(datastore.run(keyQueryBuilder
-                  .setFilter(PropertyFilter.hasAncestor(key))
-                  .build()))
-          );
+          .flatMap(key -> Streams.stream(datastore.run(Query.newKeyQueryBuilder()
+                  .setKind(sessionKind)
+                  .setFilter(PropertyFilter.hasAncestor(sessionKeyFactory.newKey(key.getName())))
+                  .build())));
       datastore.delete(toDelete.toArray(Key[]::new));
     } else {
       datastore.delete(Streams.stream(keys).toArray(Key[]::new));
