@@ -16,9 +16,6 @@
 
 package com.google.cloud.runtimes.tomcat.session;
 
-import com.google.cloud.trace.Trace;
-import com.google.cloud.trace.Tracer;
-import com.google.cloud.trace.core.TraceContext;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -95,13 +92,10 @@ public class DatastoreManager extends ManagerBase implements StoreManager {
   @Override
   public Session findSession(String id) throws IOException {
     log.debug("Datastore manager is loading session: " + id);
-    Tracer tracer = Trace.getTracer();
     Session session = null;
 
     try {
-      TraceContext context = tracer.startSpan("Loading session");
       session = this.getStore().load(id);
-      tracer.endSpan(context);
     } catch (ClassNotFoundException ex) {
       log.warn("An error occurred during session deserialization", ex);
     }
