@@ -190,7 +190,7 @@ public class DatastoreStore extends StoreBase {
    */
   private DatastoreSession deserializeSession(Key sessionKey)
       throws ClassNotFoundException, IOException {
-    TraceContext loadingSessionContext = startSpan("Loading the session from Datastore");
+    TraceContext loadingSessionContext = startSpan("Fetching the session from Datastore");
     Entity sessionEntity = null;
     List<FullEntity> attributeEntities = new LinkedList<>();
 
