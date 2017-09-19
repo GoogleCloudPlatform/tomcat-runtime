@@ -1,0 +1,20 @@
+[{
+  "name": "test-gzip",
+  "steps": [{
+    "name": "test-gzip-header",
+    "configuration": {
+      "headers": { "Accept-Encoding": "gzip" },
+      "method": "GET"
+    },
+    "path": "/dump/all"
+  }],
+  "validation": {
+    "match": [{
+      "key": "test-gzip-header.response.headers.Content-Encoding",
+      "pattern": "gzip"
+    }]
+  }
+},{
+  "name": "test-x-forwarded-proto-header",
+  "path": "custom/tests/secure"
+}]

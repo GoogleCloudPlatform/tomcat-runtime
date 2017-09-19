@@ -16,7 +16,9 @@
 
 package com.google.cloud.runtimes.tomcat.test.integration;
 
+import com.google.common.io.CharStreams;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -33,14 +35,11 @@ public class CustomServlet extends HttpServlet {
   @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
-    StringBuilder configuration = new StringBuilder();
-    configuration.append("[");
-    configuration.append("{\"path\": \"custom/tests/secure\"},");
-    // Dump the server configuration into the test logs
-    configuration.append("{\"path\": \"dump/all\"}");
-    configuration.append("]");
+
+    String configuration = CharStreams.toString(
+        new InputStreamReader(getClass().getResourceAsStream("/custom-test-specification.json")));
 
     resp.setContentType("application/json");
-    resp.getWriter().print(configuration.toString());
+    resp.getWriter().print(configuration);
   }
 }
