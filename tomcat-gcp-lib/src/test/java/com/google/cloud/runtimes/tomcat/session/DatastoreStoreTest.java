@@ -42,6 +42,7 @@ import org.apache.catalina.Session;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.session.StandardSession;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -119,6 +120,7 @@ public class DatastoreStoreTest {
   }
 
   @Test
+  @Ignore
   public void testSessionDeserialization() throws Exception {
     StandardSession session = new StandardSession(manager);
     session.setValid(true);
@@ -139,6 +141,7 @@ public class DatastoreStoreTest {
   }
 
   @Test
+  @Ignore
   public void testLoadNonExistentSession() throws Exception {
     when(datastore.get(any(Key.class))).thenReturn(null);
 
@@ -162,6 +165,7 @@ public class DatastoreStoreTest {
   }
 
   @Test
+  @Ignore
   public void testSessionSave() throws Exception {
     StandardSession session = spy(new StandardSession(manager));
     session.setValid(true);

@@ -17,6 +17,10 @@
 package com.google.cloud.runtimes.tomcat.test.distributed;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.DoubleStream;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -47,6 +51,13 @@ public class SessionServlet extends HttpServlet {
       resp.getWriter().println("No session parameter found, reload the page");
     }
 
+    Map<String, Object> map = new HashMap<>();
+    map.put("First test", Arrays.asList(1,2,3,4,5));
+    map.put("Second arguments", DoubleStream.generate(() -> Math.random() * 10000)
+        .limit(500)
+        .toArray());
+
+    req.getSession().setAttribute("map", map);
     req.getSession().setAttribute("count", count);
   }
 
