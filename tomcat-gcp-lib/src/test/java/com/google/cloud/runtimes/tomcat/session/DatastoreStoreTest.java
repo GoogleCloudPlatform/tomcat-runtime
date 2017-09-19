@@ -237,38 +237,6 @@ public class DatastoreStoreTest {
   }
 
   @Test
-  public void testSerializationTracing() throws Exception {
-    DatastoreStore storeSpy = spy(store);
-
-    DatastoreSession session = new DatastoreSession(manager);
-    session.setValid(true);
-    session.setId(keyId);
-
-    storeSpy.save(session);
-    verify(storeSpy).startSpan(contains("Serialization"));
-    verify(storeSpy).startSpan(contains("Storing"));
-  }
-
-  @Test
-  public void testDeserializationTracing() throws Exception {
-    DatastoreSession session = new DatastoreSession(manager);
-    session.setValid(true);
-    session.setId(keyId);
-    DatastoreStore storeSpy = spy(store);
-
-    Entity entity = session.saveMetadataToEntity(key)
-        .set("attributes", session.saveAttributesToEntity(keyFactory, false).stream()
-            .map(EntityValue::of)
-            .collect(Collectors.toList()))
-        .build();
-
-    when(datastore.get(any(Key.class))).thenReturn(entity);
-    storeSpy.load(keyId);
-    verify(storeSpy).startSpan(contains("Loading"));
-    verify(storeSpy).startSpan(contains("Deserialization"));
-  }
-
-  @Test
   public void testSerializationCycleWithAttributeRemoval() throws Exception {
     store.setSeparateAttributes(true);
     DatastoreSession initialSession = new DatastoreSession(manager);

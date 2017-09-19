@@ -3,6 +3,7 @@ package com.google.cloud.runtimes.tomcat.session;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.datastore.Blob;
@@ -12,6 +13,8 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.runtimes.tomcat.session.DatastoreSession.SessionMetadata;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -124,6 +127,17 @@ public class DatastoreSessionTest {
 
     assertEquals(5, restoredSession.getAttribute("count"));
     assertEquals("value", ((Map)restoredSession.getAttribute("map")).get("key"));
+  }
+
+  @Test(expected = NotSerializableException.class)
+  public void testSerializationError() throws Exception {
+    DatastoreSession session = spy(new DatastoreSession(sessionManager));
+    session.setValid(true);
+    session.setAttribute("count", 5);
+    when(session.isAttributeDistributable(any(), any())).thenReturn(true);
+    when(session.getAttribute("count")).thenReturn(sessionManager);
+
+    session.saveAttributesToEntity(new KeyFactory("project").setKind("kind"), false);
   }
 
 }
