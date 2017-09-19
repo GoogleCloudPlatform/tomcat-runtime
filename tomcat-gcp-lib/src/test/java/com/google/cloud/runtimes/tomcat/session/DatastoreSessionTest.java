@@ -13,7 +13,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.runtimes.tomcat.session.DatastoreSession.SessionMetadata;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
