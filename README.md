@@ -78,6 +78,8 @@ The distributed sessions module can be configured through the environment variab
 | gcp.distributed-sessions.namespace    |  Namespace to use in the Datastore.                         |  tomcat-gcp-persistent-session |
 | gcp.distributed-sessions.sessionKind  |  Name of the entity used to store sessions in the Datastore. |  TomcatGCloudSession |
 | gcp.distributed-sessions.uriExcludePattern | [Pattern](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) specifying which URI to ignore when persisting sessions. | null |
+| gcp.distributed-sessions.enableTrace | Register the operations of the module in Stackdriver Trace. (The [Trace module](#stackdriver-trace) must also be active) | false |
+| gcp.distributed-sessions.separateAttributes | When true, all the attributes of a session are persisted in different entities in the Datastore | false |
 
 For example on Google App Engine:
 
