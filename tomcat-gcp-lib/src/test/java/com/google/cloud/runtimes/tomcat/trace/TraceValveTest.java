@@ -26,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.cloud.trace.SpanContextHandler;
+import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.Label;
 import com.google.cloud.trace.core.Labels;
@@ -35,7 +36,6 @@ import com.google.cloud.trace.core.SpanContextHandle;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.cloud.trace.service.TraceGrpcApiService;
 import com.google.cloud.trace.service.TraceGrpcApiService.Builder;
-import com.google.cloud.trace.service.TraceService;
 import java.io.IOException;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Valve;
@@ -50,7 +50,7 @@ import org.mockito.MockitoAnnotations;
 public class TraceValveTest {
 
   @Mock
-  private TraceService traceService;
+  private TraceGrpcApiService traceService;
 
   @Mock
   private Tracer tracer;
@@ -140,9 +140,10 @@ public class TraceValveTest {
     valve.setTraceScheduledDelay(60);
     TraceValve spiedValve = spy(valve);
     Builder builder = spy(TraceGrpcApiService.builder());
-    when(builder.build()).thenReturn(mock(TraceGrpcApiService.class));
+    when(builder.build()).thenReturn(traceService);
     when(spiedValve.getTraceService()).thenReturn(builder);
     spiedValve.initTraceService();
+    assertEquals(Trace.getTracer(), traceService.getTracer());
   }
 
   @Test(expected = LifecycleException.class)
