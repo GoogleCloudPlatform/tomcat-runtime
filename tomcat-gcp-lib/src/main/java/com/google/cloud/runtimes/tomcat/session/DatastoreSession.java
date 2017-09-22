@@ -19,7 +19,6 @@ package com.google.cloud.runtimes.tomcat.session;
 import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.common.annotations.VisibleForTesting;
@@ -31,6 +30,8 @@ import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,24 +79,40 @@ public class DatastoreSession extends StandardSession {
   /**
    * Restore the attributes and metadata of the session from Datastore Entities.
    *
-   * @param metadata An entity containing the metadata of the session.
-   * @param attributes An iterator of entity, containing the name and serialized content of each
-   *                   attribute.
+   * @param entities An iterator of entity, containing the metadata and attributes of the session.
    * @throws ClassNotFoundException The class in attempt to be deserialized is not present in the
    *                                application.
    * @throws IOException Error during the deserialization of the object.
    */
-  public void restoreFromEntities(Entity metadata, Iterable<FullEntity> attributes) throws
+  public void restoreFromEntities(Key sessionKey, Iterator<Entity> entities) throws
       ClassNotFoundException, IOException {
-    creationTime = metadata.getLong(SessionMetadata.CREATION_TIME.getValue());
-    lastAccessedTime = metadata.getLong(SessionMetadata.LAST_ACCESSED_TIME.getValue());
-    maxInactiveInterval = (int)metadata.getLong(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue());
-    isNew = metadata.getBoolean(SessionMetadata.IS_NEW.getValue());
-    isValid = metadata.getBoolean(SessionMetadata.IS_VALID.getValue());
-    thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
+    Entity metadataEntity = null;
+    List<Entity> attributeEntities = new LinkedList<>();
 
-    for (FullEntity entity : attributes) {
-      String name = ((Key) entity.getKey()).getName();
+    while (entities.hasNext()) {
+      Entity entity = entities.next();
+      if (entity.getKey().equals(sessionKey)) {
+        metadataEntity = entity;
+      } else {
+        attributeEntities.add(entity);
+      }
+    }
+
+    if (metadataEntity == null) {
+      throw new IOException("The serialized session is missing the metadata entity");
+    }
+
+    creationTime = metadataEntity.getLong(SessionMetadata.CREATION_TIME.getValue());
+    lastAccessedTime = metadataEntity.getLong(SessionMetadata.LAST_ACCESSED_TIME.getValue());
+    maxInactiveInterval = (int) metadataEntity
+        .getLong(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue());
+    isNew = metadataEntity.getBoolean(SessionMetadata.IS_NEW.getValue());
+    isValid = metadataEntity.getBoolean(SessionMetadata.IS_VALID.getValue());
+    thisAccessedTime = metadataEntity.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
+
+    // Refactor to a separate method
+    for (Entity entity : attributeEntities) {
+      String name = (entity.getKey()).getName();
       Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
       try (InputStream fis = value.asInputStream();
           ObjectInputStream ois = new ObjectInputStream(fis)) {
@@ -104,6 +121,7 @@ public class DatastoreSession extends StandardSession {
       }
     }
     initialAttributes.addAll(Collections.list(getAttributeNames()));
+    setId(sessionKey.getName());
   }
 
   /**
@@ -111,7 +129,7 @@ public class DatastoreSession extends StandardSession {
    * @param sessionKey Identifier of the session on the Datastore
    * @return An entity containing the metadata.
    */
-  public Entity.Builder saveMetadataToEntity(Key sessionKey) {
+  public Entity saveMetadataToEntity(Key sessionKey) {
     Entity.Builder sessionEntity = Entity.newBuilder(sessionKey)
         .set(SessionMetadata.CREATION_TIME.getValue(), getCreationTime())
         .set(SessionMetadata.LAST_ACCESSED_TIME.getValue(), getLastAccessedTime())
@@ -126,7 +144,7 @@ public class DatastoreSession extends StandardSession {
           getLastAccessedTime() + getMaxInactiveInterval() * 1000);
     }
 
-    return sessionEntity;
+    return sessionEntity.build();
   }
 
   /**
@@ -136,16 +154,10 @@ public class DatastoreSession extends StandardSession {
              and the property `value` to the serialized attribute.
    * @throws IOException If an error occur during the serialization.
    */
-  public List<FullEntity> saveAttributesToEntity(KeyFactory attributeKeyFactory,
-      boolean separateAttributes) throws
+  public List<Entity> saveAttributesToEntity(KeyFactory attributeKeyFactory) throws
       IOException {
-    Stream<String> attributesStream = Collections.list(getAttributeNames()).stream();
-
-    if (separateAttributes) {
-      attributesStream = attributesStream.filter(name -> accessedAttributes.contains(name));
-    }
-
-    Stream<FullEntity> entities = attributesStream
+    Stream<Entity> entities = Collections.list(getAttributeNames()).stream()
+        .filter(name -> accessedAttributes.contains(name))
         .filter(name -> isAttributeDistributable(name, getAttribute(name)))
         .map(name -> serializeAttribute(attributeKeyFactory, name));
 
@@ -163,7 +175,7 @@ public class DatastoreSession extends StandardSession {
    * @param name The name of the attribute to serialize.
    * @return An Entity containing the serialized attribute.
    */
-  private FullEntity serializeAttribute(KeyFactory attributeKeyFactory, String name) {
+  private Entity serializeAttribute(KeyFactory attributeKeyFactory, String name) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
       oos.writeObject(getAttribute(name));

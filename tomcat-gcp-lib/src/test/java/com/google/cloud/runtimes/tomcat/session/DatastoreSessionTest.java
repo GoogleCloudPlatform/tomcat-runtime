@@ -6,19 +6,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import com.google.cloud.datastore.BaseEntity;
 import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Entity;
-import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.runtimes.tomcat.session.DatastoreSession.SessionMetadata;
+import com.google.common.collect.Iterators;
 import java.io.ByteArrayOutputStream;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,10 +57,8 @@ public class DatastoreSessionTest {
         .set(SessionMetadata.THIS_ACCESSED_TIME.getValue(), 3)
         .build();
 
-    List<FullEntity> attributes = new LinkedList<>();
-
     DatastoreSession session = new DatastoreSession(sessionManager);
-    session.restoreFromEntities(metadata, attributes);
+    session.restoreFromEntities(sessionKey, Iterators.singletonIterator(metadata));
 
     assertEquals(session.getMaxInactiveInterval(), 0);
     assertEquals(session.getCreationTime(), 1);
@@ -75,17 +73,19 @@ public class DatastoreSessionTest {
     Entity metadata = mock(Entity.class);
     when(metadata.getBoolean(any())).thenReturn(true);
     when(sessionKey.getName()).thenReturn("count");
+    when(metadata.getKey()).thenReturn(sessionKey);
     int count = 5;
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ObjectOutputStream oos = new ObjectOutputStream(bos);
     oos.writeObject(count);
 
-    Entity firstAttribute = Entity.newBuilder(sessionKey)
+    Entity valueEntity = Entity.newBuilder(
+        (Key)when(mock(Key.class).getName()).thenReturn("count").getMock())
         .set("value", Blob.copyFrom(bos.toByteArray()))
         .build();
 
     DatastoreSession session = new DatastoreSession(sessionManager);
-    session.restoreFromEntities(metadata, Collections.singletonList(firstAttribute));
+    session.restoreFromEntities(sessionKey, Arrays.asList(metadata, valueEntity).iterator());
 
     assertEquals(count, session.getAttribute("count"));
   }
@@ -98,11 +98,11 @@ public class DatastoreSessionTest {
     session.setAttribute("map", new HashMap<>());
 
     KeyFactory factory = new KeyFactory("project").setKind("kind");
-    List<FullEntity> entities = session.saveAttributesToEntity(factory, false);
+    List<Entity> entities = session.saveAttributesToEntity(factory);
 
     assertTrue(entities.stream()
-        .map(entity -> (Key)entity.getKey())
-        .map(key -> key.getName())
+        .map(BaseEntity::getKey)
+        .map(Key::getName)
         .collect(Collectors.toSet())
         .containsAll(Arrays.asList("count", "map")));
   }
@@ -115,11 +115,11 @@ public class DatastoreSessionTest {
     initialSession.setAttribute("map", Collections.singletonMap("key", "value"));
 
     KeyFactory keyFactory = new KeyFactory("project").setKind("kind");
-    List<FullEntity> attributes = initialSession.saveAttributesToEntity(keyFactory, false);
-    Entity.Builder metadata = initialSession.saveMetadataToEntity(sessionKey);
+    List<Entity> attributes = initialSession.saveAttributesToEntity(keyFactory);
+    attributes.add(initialSession.saveMetadataToEntity(sessionKey));
 
     DatastoreSession restoredSession = new DatastoreSession(sessionManager);
-    restoredSession.restoreFromEntities(metadata.build(), attributes);
+    restoredSession.restoreFromEntities(sessionKey, attributes.iterator());
 
     assertTrue(restoredSession.getAttribute("count") != null);
     assertTrue(restoredSession.getAttribute("map") != null);
@@ -136,7 +136,7 @@ public class DatastoreSessionTest {
     when(session.isAttributeDistributable(any(), any())).thenReturn(true);
     when(session.getAttribute("count")).thenReturn(sessionManager);
 
-    session.saveAttributesToEntity(new KeyFactory("project").setKind("kind"), false);
+    session.saveAttributesToEntity(new KeyFactory("project").setKind("kind"));
   }
 
 }
