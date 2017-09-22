@@ -116,10 +116,9 @@ public class DatastoreStoreTest {
     session.setValid(true);
     session.setId(keyId);
 
-    FullEntity sessionEntity = session
-        .saveMetadataToEntity(key);
+    Entity sessionEntity = session.saveMetadataToEntity(key);
 
-    when(datastore.<FullEntity>run(any())).thenReturn(
+    when(datastore.<Entity>run(any())).thenReturn(
         new IteratorQueryResults<>(Collections.singleton(sessionEntity).iterator()));
 
     Session loadedSession = store.load(keyId);
@@ -188,8 +187,7 @@ public class DatastoreStoreTest {
     KeyFactory attributeKeyFactory = datastore.newKeyFactory()
         .setKind("kind")
         .addAncestor(PathElement.of("kind", key.getName()));
-    List<Entity> entities = session.saveAttributesToEntity(attributeKeyFactory);
-    entities.add(session.saveMetadataToEntity(key));
+    List<Entity> entities = session.saveSessionToEntities(key, attributeKeyFactory);
 
     QueryResults<Entity> queryResults = new IteratorQueryResults<>(entities.iterator());
     when(datastore.<Entity>run(any())).thenReturn(queryResults);

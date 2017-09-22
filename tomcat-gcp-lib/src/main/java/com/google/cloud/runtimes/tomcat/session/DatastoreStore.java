@@ -263,11 +263,9 @@ public class DatastoreStore extends StoreBase {
   List<Entity> serializeSession(DatastoreSession session, Key sessionKey,
       KeyFactory attributeKeyFactory) throws IOException {
     TraceContext serializationContext = startSpan("Serialization of the session");
-    List<Entity> attributes = session.saveAttributesToEntity(attributeKeyFactory);
-    Entity sessionEntity = session.saveMetadataToEntity(sessionKey);
-    attributes.add(sessionEntity);
+    List<Entity> entities = session.saveSessionToEntities(sessionKey, attributeKeyFactory);
     endSpan(serializationContext);
-    return attributes;
+    return entities;
   }
 
   /**

@@ -87,7 +87,6 @@ public class DatastoreSession extends StandardSession {
       ClassNotFoundException, IOException {
     Entity metadataEntity = null;
     List<Entity> attributeEntities = new LinkedList<>();
-
     for (Entity entity : entities) {
       if (entity.getKey().equals(sessionKey)) {
         metadataEntity = entity;
@@ -100,29 +99,40 @@ public class DatastoreSession extends StandardSession {
       throw new IOException("The serialized session is missing the metadata entity");
     }
 
-    creationTime = metadataEntity.getLong(SessionMetadata.CREATION_TIME.getValue());
-    lastAccessedTime = metadataEntity.getLong(SessionMetadata.LAST_ACCESSED_TIME.getValue());
-    maxInactiveInterval = (int) metadataEntity
-        .getLong(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue());
-    isNew = metadataEntity.getBoolean(SessionMetadata.IS_NEW.getValue());
-    isValid = metadataEntity.getBoolean(SessionMetadata.IS_VALID.getValue());
-    thisAccessedTime = metadataEntity.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
-
-    for (Entity entity : attributeEntities) {
-      deserializeEntity(entity);
-    }
-    initialAttributes.addAll(Collections.list(getAttributeNames()));
+    restoreMetadataFromEntity(metadataEntity);
+    restoreAttributesFromEntity(attributeEntities);
     setId(sessionKey.getName());
+    initialAttributes.addAll(Collections.list(getAttributeNames()));
   }
 
-  private void deserializeEntity(Entity entity) throws IOException, ClassNotFoundException {
-    String name = (entity.getKey()).getName();
-    Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
-    try (InputStream fis = value.asInputStream();
-        ObjectInputStream ois = new ObjectInputStream(fis)) {
-      Object attribute = ois.readObject();
-      setAttribute(name, attribute, false);
+  private void restoreMetadataFromEntity(Entity metadata) {
+    creationTime = metadata.getLong(SessionMetadata.CREATION_TIME.getValue());
+    lastAccessedTime = metadata.getLong(SessionMetadata.LAST_ACCESSED_TIME.getValue());
+    maxInactiveInterval = (int) metadata
+        .getLong(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue());
+    isNew = metadata.getBoolean(SessionMetadata.IS_NEW.getValue());
+    isValid = metadata.getBoolean(SessionMetadata.IS_VALID.getValue());
+    thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
+  }
+
+  private void restoreAttributesFromEntity(Iterable<Entity> entities) throws IOException,
+      ClassNotFoundException {
+    for (Entity entity : entities) {
+      String name = entity.getKey().getName();
+      Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
+      try (InputStream fis = value.asInputStream();
+          ObjectInputStream ois = new ObjectInputStream(fis)) {
+        Object attribute = ois.readObject();
+        setAttribute(name, attribute, false);
+      }
     }
+  }
+
+  public List<Entity> saveSessionToEntities(Key sessionKey, KeyFactory attributeKeyFactory) throws
+      IOException {
+    List<Entity> entities = saveAttributesToEntity(attributeKeyFactory);
+    entities.add(saveMetadataToEntity(sessionKey));
+    return entities;
   }
 
   /**
@@ -130,7 +140,8 @@ public class DatastoreSession extends StandardSession {
    * @param sessionKey Identifier of the session on the Datastore
    * @return An entity containing the metadata.
    */
-  public Entity saveMetadataToEntity(Key sessionKey) {
+  @VisibleForTesting
+  Entity saveMetadataToEntity(Key sessionKey) {
     Entity.Builder sessionEntity = Entity.newBuilder(sessionKey)
         .set(SessionMetadata.CREATION_TIME.getValue(), getCreationTime())
         .set(SessionMetadata.LAST_ACCESSED_TIME.getValue(), getLastAccessedTime())
@@ -155,7 +166,8 @@ public class DatastoreSession extends StandardSession {
              and the property `value` to the serialized attribute.
    * @throws IOException If an error occur during the serialization.
    */
-  public List<Entity> saveAttributesToEntity(KeyFactory attributeKeyFactory) throws
+  @VisibleForTesting
+  List<Entity> saveAttributesToEntity(KeyFactory attributeKeyFactory) throws
       IOException {
     Stream<Entity> entities = Collections.list(getAttributeNames()).stream()
         .filter(name -> accessedAttributes.contains(name))
