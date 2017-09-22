@@ -4,6 +4,5 @@
   <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore"
          namespace="${gcp.distributed-sessions.namespace}"
          sessionKind="${gcp.distributed-sessions.sessionKind}"
-         traceRequest="${gcp.distributed-sessions.enableTrace}"
-         separateAttributes="${gcp.distributed-sessions.separateAttributes}"/>
+         traceRequest="${gcp.distributed-sessions.enableTrace}" />
 </Manager>

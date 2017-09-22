@@ -30,7 +30,6 @@ import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -84,13 +83,12 @@ public class DatastoreSession extends StandardSession {
    *                                application.
    * @throws IOException Error during the deserialization of the object.
    */
-  public void restoreFromEntities(Key sessionKey, Iterator<Entity> entities) throws
+  public void restoreFromEntities(Key sessionKey, Iterable<Entity> entities) throws
       ClassNotFoundException, IOException {
     Entity metadataEntity = null;
     List<Entity> attributeEntities = new LinkedList<>();
 
-    while (entities.hasNext()) {
-      Entity entity = entities.next();
+    for (Entity entity : entities) {
       if (entity.getKey().equals(sessionKey)) {
         metadataEntity = entity;
       } else {
@@ -110,18 +108,21 @@ public class DatastoreSession extends StandardSession {
     isValid = metadataEntity.getBoolean(SessionMetadata.IS_VALID.getValue());
     thisAccessedTime = metadataEntity.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
 
-    // Refactor to a separate method
     for (Entity entity : attributeEntities) {
-      String name = (entity.getKey()).getName();
-      Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
-      try (InputStream fis = value.asInputStream();
-          ObjectInputStream ois = new ObjectInputStream(fis)) {
-        Object attribute = ois.readObject();
-        setAttribute(name, attribute, false);
-      }
+      deserializeEntity(entity);
     }
     initialAttributes.addAll(Collections.list(getAttributeNames()));
     setId(sessionKey.getName());
+  }
+
+  private void deserializeEntity(Entity entity) throws IOException, ClassNotFoundException {
+    String name = (entity.getKey()).getName();
+    Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
+    try (InputStream fis = value.asInputStream();
+        ObjectInputStream ois = new ObjectInputStream(fis)) {
+      Object attribute = ois.readObject();
+      setAttribute(name, attribute, false);
+    }
   }
 
   /**

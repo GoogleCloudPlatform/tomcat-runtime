@@ -31,6 +31,7 @@ import com.google.cloud.trace.Trace;
 import com.google.cloud.trace.Tracer;
 import com.google.cloud.trace.core.TraceContext;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.io.IOException;
@@ -189,7 +190,7 @@ public class DatastoreStore extends StoreBase {
     if (entities.hasNext()) {
       session = (DatastoreSession) manager.createEmptySession();
       TraceContext deserializationContext = startSpan("Deserialization of the session");
-      session.restoreFromEntities(sessionKey, entities);
+      session.restoreFromEntities(sessionKey, Lists.newArrayList(entities));
       endSpan(deserializationContext);
     }
     return session;
@@ -269,6 +270,9 @@ public class DatastoreStore extends StoreBase {
     return attributes;
   }
 
+  /**
+   * Remove expired sessions from the datastore.
+   */
   @Override
   public void processExpires() {
     log.debug("Processing expired sessions");

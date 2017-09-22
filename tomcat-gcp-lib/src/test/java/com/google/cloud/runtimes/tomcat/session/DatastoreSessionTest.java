@@ -12,8 +12,8 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.runtimes.tomcat.session.DatastoreSession.SessionMetadata;
-import com.google.common.collect.Iterators;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
@@ -58,7 +58,7 @@ public class DatastoreSessionTest {
         .build();
 
     DatastoreSession session = new DatastoreSession(sessionManager);
-    session.restoreFromEntities(sessionKey, Iterators.singletonIterator(metadata));
+    session.restoreFromEntities(sessionKey, Collections.singleton(metadata));
 
     assertEquals(session.getMaxInactiveInterval(), 0);
     assertEquals(session.getCreationTime(), 1);
@@ -85,7 +85,7 @@ public class DatastoreSessionTest {
         .build();
 
     DatastoreSession session = new DatastoreSession(sessionManager);
-    session.restoreFromEntities(sessionKey, Arrays.asList(metadata, valueEntity).iterator());
+    session.restoreFromEntities(sessionKey, Arrays.asList(metadata, valueEntity));
 
     assertEquals(count, session.getAttribute("count"));
   }
@@ -119,7 +119,7 @@ public class DatastoreSessionTest {
     attributes.add(initialSession.saveMetadataToEntity(sessionKey));
 
     DatastoreSession restoredSession = new DatastoreSession(sessionManager);
-    restoredSession.restoreFromEntities(sessionKey, attributes.iterator());
+    restoredSession.restoreFromEntities(sessionKey, attributes);
 
     assertTrue(restoredSession.getAttribute("count") != null);
     assertTrue(restoredSession.getAttribute("map") != null);
@@ -137,6 +137,16 @@ public class DatastoreSessionTest {
     when(session.getAttribute("count")).thenReturn(sessionManager);
 
     session.saveAttributesToEntity(new KeyFactory("project").setKind("kind"));
+  }
+
+  @Test(expected = IOException.class)
+  public void testSerializationWithoutMetadata() throws Exception {
+    DatastoreSession session = new DatastoreSession(sessionManager);
+    Entity attribute = Entity.newBuilder(new KeyFactory("project")
+        .setKind("kind")
+        .newKey("456"))
+        .build();
+    session.restoreFromEntities(sessionKey, Collections.singleton(attribute));
   }
 
 }
