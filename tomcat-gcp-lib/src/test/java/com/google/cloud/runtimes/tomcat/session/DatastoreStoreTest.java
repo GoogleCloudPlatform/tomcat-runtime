@@ -187,7 +187,7 @@ public class DatastoreStoreTest {
     KeyFactory attributeKeyFactory = datastore.newKeyFactory()
         .setKind("kind")
         .addAncestor(PathElement.of("kind", key.getName()));
-    List<Entity> entities = session.saveSessionToEntities(key, attributeKeyFactory);
+    List<Entity> entities = session.saveToEntities(key, attributeKeyFactory);
 
     QueryResults<Entity> queryResults = new IteratorQueryResults<>(entities.iterator());
     when(datastore.<Entity>run(any())).thenReturn(queryResults);

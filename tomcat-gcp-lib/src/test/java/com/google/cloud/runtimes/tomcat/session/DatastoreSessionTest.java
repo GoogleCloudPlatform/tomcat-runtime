@@ -115,7 +115,7 @@ public class DatastoreSessionTest {
     initialSession.setAttribute("map", Collections.singletonMap("key", "value"));
 
     KeyFactory keyFactory = new KeyFactory("project").setKind("kind");
-    List<Entity> attributes = initialSession.saveSessionToEntities(sessionKey, keyFactory);
+    List<Entity> attributes = initialSession.saveToEntities(sessionKey, keyFactory);
 
     DatastoreSession restoredSession = new DatastoreSession(sessionManager);
     restoredSession.restoreFromEntities(sessionKey, attributes);

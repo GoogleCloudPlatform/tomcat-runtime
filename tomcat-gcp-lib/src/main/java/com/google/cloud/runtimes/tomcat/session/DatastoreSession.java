@@ -128,7 +128,15 @@ public class DatastoreSession extends StandardSession {
     }
   }
 
-  public List<Entity> saveSessionToEntities(Key sessionKey, KeyFactory attributeKeyFactory) throws
+  /**
+   * Serialize the session metadata and attributes into entities storable in the datastore.
+   * @param sessionKey The key of the serialized session
+   * @param attributeKeyFactory A key factory containing sessionKey in its ancestors, used to
+   *                            generate the key for the attributes.
+   * @return A list of entities containing the metadata and each attribute.
+   * @throws IOException If an error occur during the serialization.
+   */
+  public List<Entity> saveToEntities(Key sessionKey, KeyFactory attributeKeyFactory) throws
       IOException {
     List<Entity> entities = saveAttributesToEntity(attributeKeyFactory);
     entities.add(saveMetadataToEntity(sessionKey));
