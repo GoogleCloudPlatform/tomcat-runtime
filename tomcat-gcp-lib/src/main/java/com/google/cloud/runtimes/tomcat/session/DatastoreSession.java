@@ -38,6 +38,10 @@ import java.util.stream.Stream;
 import org.apache.catalina.Manager;
 import org.apache.catalina.session.StandardSession;
 
+/**
+ * A DatastoreSession have the same behavior as a standard session but provide utilities to interact
+ * with the Datastore, such as helper for attributes and metadata serialization.
+ */
 public class DatastoreSession extends StandardSession {
 
   protected Set<String> accessedAttributes;
@@ -105,6 +109,10 @@ public class DatastoreSession extends StandardSession {
     initialAttributes.addAll(Collections.list(getAttributeNames()));
   }
 
+  /**
+   * Restore the metadata of a session with the values contains in the entity.
+   * @param metadata An entity containing the metadata to restore
+   */
   private void restoreMetadataFromEntity(Entity metadata) {
     creationTime = metadata.getLong(SessionMetadata.CREATION_TIME.getValue());
     lastAccessedTime = metadata.getLong(SessionMetadata.LAST_ACCESSED_TIME.getValue());
@@ -115,6 +123,12 @@ public class DatastoreSession extends StandardSession {
     thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
   }
 
+  /**
+   * Deserialize the content of each entity and add them as attribute of the session.
+   * @param entities The entities containing the serialized attributes.
+   * @throws IOException If an error occur during the deserialization
+   * @throws ClassNotFoundException If the class being deserialized is not present in this program.
+   */
   private void restoreAttributesFromEntity(Iterable<Entity> entities) throws IOException,
       ClassNotFoundException {
     for (Entity entity : entities) {
