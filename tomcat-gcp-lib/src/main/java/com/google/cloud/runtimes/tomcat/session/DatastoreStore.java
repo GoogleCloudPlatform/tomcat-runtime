@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.util.Arrays;
 
 import java.util.Iterator;
@@ -78,6 +79,8 @@ public class DatastoreStore extends StoreBase {
    */
   private boolean traceRequest = false;
 
+  private Clock clock;
+
   /**
    * {@inheritDoc}
    *
@@ -88,6 +91,7 @@ public class DatastoreStore extends StoreBase {
   protected synchronized void startInternal() throws LifecycleException {
     log.debug("Initialization of the Datastore Store");
 
+    this.clock = Clock.systemUTC();
     this.datastore = DatastoreOptions.newBuilder().setNamespace(namespace).build().getService();
 
     super.startInternal();
@@ -277,7 +281,7 @@ public class DatastoreStore extends StoreBase {
 
     Query<Key> query = Query.newKeyQueryBuilder().setKind(sessionKind)
         .setFilter(PropertyFilter.le(SessionMetadata.EXPIRATION_TIME,
-            System.currentTimeMillis()))
+            clock.millis()))
         .build();
 
     QueryResults<Key> keys = datastore.run(query);
@@ -334,6 +338,11 @@ public class DatastoreStore extends StoreBase {
   @VisibleForTesting
   void setDatastore(Datastore datastore) {
     this.datastore = datastore;
+  }
+
+  @VisibleForTesting
+  void setClock(Clock clock) {
+    this.clock = clock;
   }
 
 }

@@ -34,6 +34,7 @@ import com.google.cloud.datastore.KeyQuery;
 import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.QueryResults;
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -60,6 +61,9 @@ public class DatastoreStoreTest {
   @Mock
   private Manager manager;
 
+  @Mock
+  private Clock clock;
+
   private Key key;
 
   private Key attributeKey;
@@ -85,6 +89,7 @@ public class DatastoreStoreTest {
     when(manager.createEmptySession()).thenReturn(new DatastoreSession(manager));
 
     store.setDatastore(datastore);
+    store.setClock(clock);
     store.setSessionKind("kind");
     store.setManager(manager);
   }
