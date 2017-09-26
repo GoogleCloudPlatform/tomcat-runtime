@@ -276,7 +276,7 @@ public class DatastoreStore extends StoreBase {
     log.debug("Processing expired sessions");
 
     Query<Key> query = Query.newKeyQueryBuilder().setKind(sessionKind)
-        .setFilter(PropertyFilter.le(SessionMetadata.EXPIRATION_TIME.getValue(),
+        .setFilter(PropertyFilter.le(SessionMetadata.EXPIRATION_TIME,
             System.currentTimeMillis()))
         .build();
 

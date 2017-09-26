@@ -48,25 +48,15 @@ public class DatastoreSession extends StandardSession {
   protected Set<String> initialAttributes;
 
   @VisibleForTesting
-  enum SessionMetadata {
-    CREATION_TIME("creationTime"),
-    LAST_ACCESSED_TIME("lastAccessedTime"),
-    MAX_INACTIVE_INTERVAL("maxInactiveInterval"),
-    IS_NEW("isNew"),
-    IS_VALID("isValid"),
-    THIS_ACCESSED_TIME("thisAccessedTime"),
-    EXPIRATION_TIME("expirationTime"),
-    ATTRIBUTE_VALUE_NAME("value");
-
-    private final String value;
-
-    SessionMetadata(String value) {
-      this.value = value;
-    }
-
-    public String getValue() {
-      return value;
-    }
+  class SessionMetadata {
+    static final String CREATION_TIME = "creationTime";
+    static final String LAST_ACCESSED_TIME = "lastAccessedTime";
+    static final String MAX_INACTIVE_INTERVAL = "maxInactiveInterval";
+    static final String IS_NEW = "isNew";
+    static final String IS_VALID = "isValid";
+    static final String THIS_ACCESSED_TIME = "thisAccessedTime";
+    static final String EXPIRATION_TIME = "expirationTime";
+    static final String ATTRIBUTE_VALUE_NAME = "value";
   }
 
   /**
@@ -114,13 +104,12 @@ public class DatastoreSession extends StandardSession {
    * @param metadata An entity containing the metadata to restore
    */
   private void restoreMetadataFromEntity(Entity metadata) {
-    creationTime = metadata.getLong(SessionMetadata.CREATION_TIME.getValue());
-    lastAccessedTime = metadata.getLong(SessionMetadata.LAST_ACCESSED_TIME.getValue());
-    maxInactiveInterval = (int) metadata
-        .getLong(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue());
-    isNew = metadata.getBoolean(SessionMetadata.IS_NEW.getValue());
-    isValid = metadata.getBoolean(SessionMetadata.IS_VALID.getValue());
-    thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME.getValue());
+    creationTime = metadata.getLong(SessionMetadata.CREATION_TIME);
+    lastAccessedTime = metadata.getLong(SessionMetadata.LAST_ACCESSED_TIME);
+    maxInactiveInterval = (int) metadata.getLong(SessionMetadata.MAX_INACTIVE_INTERVAL);
+    isNew = metadata.getBoolean(SessionMetadata.IS_NEW);
+    isValid = metadata.getBoolean(SessionMetadata.IS_VALID);
+    thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME);
   }
 
   /**
@@ -133,7 +122,7 @@ public class DatastoreSession extends StandardSession {
       ClassNotFoundException {
     for (Entity entity : entities) {
       String name = entity.getKey().getName();
-      Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue());
+      Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME);
       try (InputStream fis = value.asInputStream();
           ObjectInputStream ois = new ObjectInputStream(fis)) {
         Object attribute = ois.readObject();
@@ -165,16 +154,16 @@ public class DatastoreSession extends StandardSession {
   @VisibleForTesting
   Entity saveMetadataToEntity(Key sessionKey) {
     Entity.Builder sessionEntity = Entity.newBuilder(sessionKey)
-        .set(SessionMetadata.CREATION_TIME.getValue(), getCreationTime())
-        .set(SessionMetadata.LAST_ACCESSED_TIME.getValue(), getLastAccessedTime())
-        .set(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue(), getMaxInactiveInterval())
-        .set(SessionMetadata.IS_NEW.getValue(), isNew())
-        .set(SessionMetadata.IS_VALID.getValue(), isValid())
-        .set(SessionMetadata.THIS_ACCESSED_TIME.getValue(), getThisAccessedTime());
+        .set(SessionMetadata.CREATION_TIME, getCreationTime())
+        .set(SessionMetadata.LAST_ACCESSED_TIME, getLastAccessedTime())
+        .set(SessionMetadata.MAX_INACTIVE_INTERVAL, getMaxInactiveInterval())
+        .set(SessionMetadata.IS_NEW, isNew())
+        .set(SessionMetadata.IS_VALID, isValid())
+        .set(SessionMetadata.THIS_ACCESSED_TIME, getThisAccessedTime());
 
     // A negative time indicates that the session should never time out
     if (getMaxInactiveInterval() >= 0) {
-      sessionEntity.set(SessionMetadata.EXPIRATION_TIME.getValue(),
+      sessionEntity.set(SessionMetadata.EXPIRATION_TIME,
           getLastAccessedTime() + getMaxInactiveInterval() * 1000);
     }
 
@@ -219,7 +208,7 @@ public class DatastoreSession extends StandardSession {
     }
 
     return Entity.newBuilder(attributeKeyFactory.newKey(name))
-        .set(SessionMetadata.ATTRIBUTE_VALUE_NAME.getValue(),
+        .set(SessionMetadata.ATTRIBUTE_VALUE_NAME,
             BlobValue.newBuilder(Blob.copyFrom(bos.toByteArray()))
                 .setExcludeFromIndexes(true)
                 .build())

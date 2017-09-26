@@ -49,12 +49,12 @@ public class DatastoreSessionTest {
   @Test
   public void testMetadataDeserialization() throws Exception {
     Entity metadata = Entity.newBuilder(sessionKey)
-        .set(SessionMetadata.MAX_INACTIVE_INTERVAL.getValue(), 0)
-        .set(SessionMetadata.CREATION_TIME.getValue(), 1)
-        .set(SessionMetadata.LAST_ACCESSED_TIME.getValue(), 2)
-        .set(SessionMetadata.IS_NEW.getValue(), true)
-        .set(SessionMetadata.IS_VALID.getValue(), true)
-        .set(SessionMetadata.THIS_ACCESSED_TIME.getValue(), 3)
+        .set(SessionMetadata.MAX_INACTIVE_INTERVAL, 0)
+        .set(SessionMetadata.CREATION_TIME, 1)
+        .set(SessionMetadata.LAST_ACCESSED_TIME, 2)
+        .set(SessionMetadata.IS_NEW, true)
+        .set(SessionMetadata.IS_VALID, true)
+        .set(SessionMetadata.THIS_ACCESSED_TIME, 3)
         .build();
 
     DatastoreSession session = new DatastoreSession(sessionManager);
