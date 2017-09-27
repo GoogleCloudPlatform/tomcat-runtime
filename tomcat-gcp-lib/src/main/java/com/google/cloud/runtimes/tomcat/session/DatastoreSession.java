@@ -49,14 +49,14 @@ public class DatastoreSession extends StandardSession {
 
   @VisibleForTesting
   class SessionMetadata {
-    static final String CREATION_TIME = "creationTime";
-    static final String LAST_ACCESSED_TIME = "lastAccessedTime";
-    static final String MAX_INACTIVE_INTERVAL = "maxInactiveInterval";
-    static final String IS_NEW = "isNew";
-    static final String IS_VALID = "isValid";
-    static final String THIS_ACCESSED_TIME = "thisAccessedTime";
-    static final String EXPIRATION_TIME = "expirationTime";
-    static final String ATTRIBUTE_VALUE_NAME = "value";
+    public static final String CREATION_TIME = "creationTime";
+    public static final String LAST_ACCESSED_TIME = "lastAccessedTime";
+    public static final String MAX_INACTIVE_INTERVAL = "maxInactiveInterval";
+    public static final String IS_NEW = "isNew";
+    public static final String IS_VALID = "isValid";
+    public static final String THIS_ACCESSED_TIME = "thisAccessedTime";
+    public static final String EXPIRATION_TIME = "expirationTime";
+    public static final String ATTRIBUTE_VALUE_NAME = "value";
   }
 
   /**
@@ -216,7 +216,9 @@ public class DatastoreSession extends StandardSession {
   }
 
   /**
-   * List the attributes that were loaded from the Datastore and suppressed during the execution.
+   * List the attributes that were present at the beginning of the request and suppressed during
+   * its execution. This is used to reflect the suppression of attributes in the Datastore (The
+   * suppressed attributes would be left unchanged in the Datastore otherwise).
    * @return A set of the suppressed attributes.
    */
   public Set<String> getSuppressedAttributes() {
