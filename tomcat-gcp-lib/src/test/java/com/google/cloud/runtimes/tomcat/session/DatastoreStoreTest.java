@@ -24,26 +24,29 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Cursor;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
+import com.google.cloud.datastore.KeyQuery;
+import com.google.cloud.datastore.PathElement;
 import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.common.collect.ImmutableList;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
+import java.time.Clock;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
 import org.apache.catalina.core.StandardContext;
-import org.apache.catalina.session.StandardSession;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -56,91 +59,83 @@ public class DatastoreStoreTest {
   private Datastore datastore;
 
   @Mock
-  private KeyFactory keyFactory;
-
-  @Mock
-  private StructuredQuery.Builder<Key> keyBuilder;
-
-  @Mock
   private Manager manager;
 
   @Mock
+  private Clock clock;
+
   private Key key;
 
-  @Mock
-  private StructuredQuery<Key> keyQuery;
+  private Key attributeKey;
 
-  @InjectMocks
   private DatastoreStore store;
-
-  private QueryResults<Key> keyQueryResults;
 
   private static final String keyId = "123";
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+    store = new DatastoreStore();
+    KeyFactory keyFactory = new KeyFactory("project").setKind("kind");
+    key = keyFactory.newKey(keyId);
+    attributeKey = keyFactory.newKey("attribute");
+    QueryResults<Key> keyQueryResults = new IteratorQueryResults<>(ImmutableList.of(key).iterator());
 
-    when(keyBuilder.build()).thenReturn(keyQuery);
-    when(keyBuilder.setFilter(any())).thenReturn(keyBuilder);
-    when(keyFactory.newKey(keyId)).thenReturn(key);
-    when(key.getNameOrId()).thenReturn(keyId);
+    when(datastore.newKeyFactory()).thenAnswer((invocation) -> new KeyFactory("project"));
+    when(datastore.run(any(KeyQuery.class))).thenReturn(keyQueryResults);
+
     when(manager.getContext()).thenReturn(new StandardContext());
     when(manager.willAttributeDistribute(anyString(), any())).thenReturn(true);
+    when(manager.createEmptySession()).thenReturn(new DatastoreSession(manager));
 
-    keyQueryResults = new IteratorQueryResults<>(ImmutableList.of(key).iterator());
+    store.setDatastore(datastore);
+    store.setClock(clock);
+    store.setSessionKind("kind");
+    store.setManager(manager);
   }
 
   @Test
   public void testGetStoreSize() throws Exception {
-    when(datastore.run(keyQuery)).thenReturn(keyQueryResults);
-
     int size = store.getSize();
-    verify(datastore).run(keyQuery);
+    verify(datastore).run(any(KeyQuery.class));
     assertEquals(1, size);
   }
 
   @Test
   public void testClearStore() throws Exception {
-    when(datastore.run(keyQuery)).thenReturn(keyQueryResults);
-
     store.clear();
-    verify(datastore).delete(key);
+    verify(datastore).delete(any(Key.class));
   }
 
   @Test
   public void testEnumerateKeys() throws Exception {
-    when(datastore.run(keyQuery)).thenReturn(keyQueryResults);
-
     String[] keys = store.keys();
-    verify(datastore).run(keyQuery);
+    verify(datastore).run(any(KeyQuery.class));
     assertEquals(1, keys.length);
     assertEquals(keyId, keys[0]);
   }
 
   @Test
-  public void testSessionDeserialization() throws Exception {
-    StandardSession session = new StandardSession(manager);
+  public void testEmptySessionLoading() throws Exception {
+    DatastoreSession session = new DatastoreSession(manager);
     session.setValid(true);
     session.setId(keyId);
-    session.setAttribute("value-to-serialize", 10);
-    Blob serializedSession = serializeSession(session);
-    Entity entity = Entity.newBuilder(key).set("content", serializedSession).build();
 
-    when(datastore.get(key)).thenReturn(entity);
-    when(manager.createEmptySession()).thenReturn(new StandardSession(manager));
+    Entity sessionEntity = session.saveMetadataToEntity(key);
+
+    when(datastore.<Entity>run(any())).thenReturn(
+        new IteratorQueryResults<>(Collections.singleton(sessionEntity).iterator()));
 
     Session loadedSession = store.load(keyId);
-    verify(datastore).get(key);
+    verify(datastore).run(any());
     verify(manager).createEmptySession();
 
-    assertEquals(keyId, loadedSession.getId());
-    assertEquals(10, loadedSession.getSession().getAttribute("value-to-serialize"));
+    assertEquals(loadedSession.getId(), keyId);
   }
 
   @Test
   public void testLoadNonExistentSession() throws Exception {
-    when(datastore.get(any(Key.class))).thenReturn(null);
+    when(datastore.run(any())).thenReturn(new IteratorQueryResults<>(Collections.emptyIterator()));
 
     Session session = store.load("456");
     verify(manager, never()).createEmptySession();
@@ -150,42 +145,104 @@ public class DatastoreStoreTest {
   @Test
   public void testSessionRemoval() throws Exception {
     store.remove(keyId);
-    verify(datastore).delete(key);
+    verify(datastore).delete(any(Key.class));
   }
 
   @Test
-  public void testExpirationProcess() throws Exception {
-    when(datastore.run(keyQuery)).thenReturn(keyQueryResults);
+  public void testSessionExpiration() throws Exception {
+    when(datastore.run(any(KeyQuery.class))).thenReturn(
+        new IteratorQueryResults<>(Collections.singletonList(key).iterator()),
+        new IteratorQueryResults<>(Arrays.asList(key, attributeKey).iterator())
+    );
 
     store.processExpires();
-    verify(datastore).delete(key);
+    verify(datastore).delete(Arrays.asList(key, attributeKey).toArray(new Key[0]));
   }
 
   @Test
   public void testSessionSave() throws Exception {
-    StandardSession session = spy(new StandardSession(manager));
+    DatastoreSession session = spy(new DatastoreSession(manager));
     session.setValid(true);
     session.setId(keyId);
+    session.setAttribute("count", 5);
 
     store.save(session);
-    verify(datastore).put(any(FullEntity.class));
-    verify(session).writeObjectData(any());
+    ArgumentCaptor captor = ArgumentCaptor.forClass(Entity.class);
+    verify(datastore).put((FullEntity<?>[]) captor.capture());
+    verify(session).saveAttributesToEntity(any());
+
+    List<Entity> entities = captor.getAllValues();
+    assertEquals(2, entities.size());
+
+    assertTrue(entities.stream()
+        .map(e -> e.getKey().getName())
+        .collect(Collectors.toList())
+        .containsAll(Arrays.asList("count", keyId)));
+
   }
 
-  /**
-   * Create a blob containing the serialized version of the session
-   *
-   * @param session A session in a valid state
-   * @return A Blob with the session serialized
-   */
-  private Blob serializeSession(StandardSession session) throws Exception {
+  @Test
+  public void testDecomposedSessionLoad() throws Exception {
+    DatastoreSession session = new DatastoreSession(manager);
+    session.setValid(true);
+    session.setId(keyId);
+    session.setAttribute("count", 2);
+    session.setAttribute("map", Collections.singletonMap("key", "value"));
 
-    ByteArrayOutputStream outputArray = new ByteArrayOutputStream();
-    try (ObjectOutputStream outputStream = new ObjectOutputStream(outputArray)) {
-      session.writeObjectData(outputStream);
-    }
+    KeyFactory attributeKeyFactory = datastore.newKeyFactory()
+        .setKind("kind")
+        .addAncestor(PathElement.of("kind", key.getName()));
+    List<Entity> entities = session.saveToEntities(key, attributeKeyFactory);
 
-    return Blob.copyFrom(outputArray.toByteArray());
+    QueryResults<Entity> queryResults = new IteratorQueryResults<>(entities.iterator());
+    when(datastore.<Entity>run(any())).thenReturn(queryResults);
+
+    Session restored = store.load(keyId);
+
+    assertEquals(keyId, restored.getId());
+    assertEquals(2, restored.getSession().getAttribute("count"));
+    assertEquals("value",
+        ((Map<String, String>)session.getSession().getAttribute("map")).get("key"));
+  }
+
+  @Test
+  public void testSerializationCycleWithAttributeRemoval() throws Exception {
+    DatastoreSession initialSession = new DatastoreSession(manager);
+    initialSession.setValid(true);
+    initialSession.setId(keyId);
+    initialSession.setAttribute("count", 5);
+    initialSession.setAttribute("map", Collections.singletonMap("key", "value"));
+    KeyFactory attributeKeyFactory = datastore.newKeyFactory()
+        .setKind("kind")
+        .addAncestor(PathElement.of("kind", key.getName()));
+
+    List<Entity> initialSessionEntities = store.serializeSession(initialSession, key,
+        attributeKeyFactory);
+
+    // Load the session and remove the map attribute
+    when(datastore.<Entity>run(any())).thenReturn(
+        new IteratorQueryResults<>(initialSessionEntities.iterator()));
+    DatastoreSession session = (DatastoreSession)store.load(keyId);
+    session.getSession().setAttribute("map", null);
+
+    // Save and reload the session to ensure that the attribute map is not serialized
+    store.save(session);
+
+    ArgumentCaptor<Key> keyCaptors = ArgumentCaptor.forClass(Key.class);
+    verify(datastore).delete(keyCaptors.capture());
+
+    assertNotNull(keyCaptors.getValue());
+    assertEquals("map", keyCaptors.getValue().getName());
+  }
+
+
+  @Test
+  public void testTracerActivation() throws Exception {
+    store.setTraceRequest(false);
+    assertNull(store.startSpan("span"));
+
+    store.setTraceRequest(true);
+    assertNotNull(store.startSpan("span"));
   }
 
   /**
