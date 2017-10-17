@@ -34,10 +34,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Ensures that {@code DatastoreValve} is persisting the session in the store at the end
- * of each request.
+ * Ensures that {@code KeyValuePersistentValve} is persisting the session in the store at the end of
+ * each request.
  */
-public class DatastoreValveTest {
+public class KeyValuePersistentValveTest {
 
   @Mock
   private Context context;
@@ -60,7 +60,7 @@ public class DatastoreValveTest {
   @Mock
   private Valve nextValve = mock(Valve.class);
 
-  private DatastoreValve valve;
+  private KeyValuePersistentValve valve;
 
   @Before
   public void setUp() throws Exception {
@@ -70,7 +70,7 @@ public class DatastoreValveTest {
     when(manager.getStore()).thenReturn(store);
     when(request.getSessionInternal(anyBoolean())).thenReturn(session);
     when(request.getContext()).thenReturn(context);
-    valve = new DatastoreValve();
+    valve = new KeyValuePersistentValve();
   }
 
   @Test

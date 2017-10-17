@@ -20,7 +20,6 @@ import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.BlobValue;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
 import com.google.common.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,82 +27,42 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UncheckedIOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.function.Function;
 import org.apache.catalina.Manager;
-import org.apache.catalina.session.StandardSession;
 
 /**
- * A DatastoreSession have the same behavior as a standard session but provide utilities to interact
+ * A DatastoreSession has the same behavior as a standard session but provide utilities to interact
  * with the Datastore, such as helper for attributes and metadata serialization.
  */
-public class DatastoreSession extends StandardSession {
+public class DatastoreSession extends KeyValuePersistentSession<Key, Entity> {
 
-  protected Set<String> accessedAttributes;
-  protected Set<String> initialAttributes;
-
-  @VisibleForTesting
-  class SessionMetadata {
-    public static final String CREATION_TIME = "creationTime";
-    public static final String LAST_ACCESSED_TIME = "lastAccessedTime";
-    public static final String MAX_INACTIVE_INTERVAL = "maxInactiveInterval";
-    public static final String IS_NEW = "isNew";
-    public static final String IS_VALID = "isValid";
-    public static final String THIS_ACCESSED_TIME = "thisAccessedTime";
-    public static final String EXPIRATION_TIME = "expirationTime";
-    public static final String ATTRIBUTE_VALUE_NAME = "value";
-  }
-
-  /**
-   * Create a new session which can be stored in the Datastore.
-   * @param manager The session manager which manage this session.
-   */
   public DatastoreSession(Manager manager) {
     super(manager);
-    this.accessedAttributes = new HashSet<>();
-    this.initialAttributes = new HashSet<>();
   }
 
-  /**
-   * Restore the attributes and metadata of the session from Datastore Entities.
-   *
-   * @param entities An iterator of entity, containing the metadata and attributes of the session.
-   * @throws ClassNotFoundException The class in attempt to be deserialized is not present in the
-   *                                application.
-   * @throws IOException Error during the deserialization of the object.
-   */
-  public void restoreFromEntities(Key sessionKey, Iterable<Entity> entities) throws
-      ClassNotFoundException, IOException {
-    Entity metadataEntity = null;
-    List<Entity> attributeEntities = new LinkedList<>();
-    for (Entity entity : entities) {
-      if (entity.getKey().equals(sessionKey)) {
-        metadataEntity = entity;
-      } else {
-        attributeEntities.add(entity);
-      }
-    }
-
-    if (metadataEntity == null) {
-      throw new IOException("The serialized session is missing the metadata entity");
-    }
-
-    restoreMetadataFromEntity(metadataEntity);
-    restoreAttributesFromEntity(attributeEntities);
-    setId(sessionKey.getName());
-    initialAttributes.addAll(Collections.list(getAttributeNames()));
+  @Override
+  protected Key getKeyForEntity(Entity entity) {
+    return entity.getKey();
   }
 
-  /**
-   * Restore the metadata of a session with the values contains in the entity.
-   * @param metadata An entity containing the metadata to restore
-   */
-  private void restoreMetadataFromEntity(Entity metadata) {
+  @Override
+  protected String getNameFromKey(Key key) {
+    return key.getName();
+  }
+
+  @Override
+  protected void setAttributeFromEntity(Entity entity) throws IOException, ClassNotFoundException {
+    String name = entity.getKey().getName();
+    Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME);
+    try (InputStream fis = value.asInputStream();
+        ObjectInputStream ois = new ObjectInputStream(fis)) {
+      Object attribute = ois.readObject();
+      setAttribute(name, attribute, false);
+    }
+  }
+
+  @Override
+  protected void restoreMetadataFromEntity(Entity metadata) {
     creationTime = metadata.getLong(SessionMetadata.CREATION_TIME);
     lastAccessedTime = metadata.getLong(SessionMetadata.LAST_ACCESSED_TIME);
     maxInactiveInterval = (int) metadata.getLong(SessionMetadata.MAX_INACTIVE_INTERVAL);
@@ -112,47 +71,9 @@ public class DatastoreSession extends StandardSession {
     thisAccessedTime = metadata.getLong(SessionMetadata.THIS_ACCESSED_TIME);
   }
 
-  /**
-   * Deserialize the content of each entity and add them as attribute of the session.
-   * @param entities The entities containing the serialized attributes.
-   * @throws IOException If an error occur during the deserialization
-   * @throws ClassNotFoundException If the class being deserialized is not present in this program.
-   */
-  private void restoreAttributesFromEntity(Iterable<Entity> entities) throws IOException,
-      ClassNotFoundException {
-    for (Entity entity : entities) {
-      String name = entity.getKey().getName();
-      Blob value = entity.getBlob(SessionMetadata.ATTRIBUTE_VALUE_NAME);
-      try (InputStream fis = value.asInputStream();
-          ObjectInputStream ois = new ObjectInputStream(fis)) {
-        Object attribute = ois.readObject();
-        setAttribute(name, attribute, false);
-      }
-    }
-  }
-
-  /**
-   * Serialize the session metadata and attributes into entities storable in the datastore.
-   * @param sessionKey The key of the serialized session
-   * @param attributeKeyFactory A key factory containing sessionKey in its ancestors, used to
-   *                            generate the key for the attributes.
-   * @return A list of entities containing the metadata and each attribute.
-   * @throws IOException If an error occur during the serialization.
-   */
-  public List<Entity> saveToEntities(Key sessionKey, KeyFactory attributeKeyFactory) throws
-      IOException {
-    List<Entity> entities = saveAttributesToEntity(attributeKeyFactory);
-    entities.add(saveMetadataToEntity(sessionKey));
-    return entities;
-  }
-
-  /**
-   * Store the metadata of the session in an entity.
-   * @param sessionKey Identifier of the session on the Datastore
-   * @return An entity containing the metadata.
-   */
   @VisibleForTesting
-  Entity saveMetadataToEntity(Key sessionKey) {
+  @Override
+  protected Entity saveMetadataToEntity(Key sessionKey) {
     Entity.Builder sessionEntity = Entity.newBuilder(sessionKey)
         .set(SessionMetadata.CREATION_TIME, getCreationTime())
         .set(SessionMetadata.LAST_ACCESSED_TIME, getLastAccessedTime())
@@ -170,36 +91,8 @@ public class DatastoreSession extends StandardSession {
     return sessionEntity.build();
   }
 
-  /**
-   * Serialize the session attributes into entities.
-   * @param attributeKeyFactory The key builder for the entities.
-   * @return A list of entities where the key correspond to the name of the attribute
-             and the property `value` to the serialized attribute.
-   * @throws IOException If an error occur during the serialization.
-   */
-  @VisibleForTesting
-  List<Entity> saveAttributesToEntity(KeyFactory attributeKeyFactory) throws
-      IOException {
-    Stream<Entity> entities = Collections.list(getAttributeNames()).stream()
-        .filter(name -> accessedAttributes.contains(name))
-        .filter(name -> isAttributeDistributable(name, getAttribute(name)))
-        .map(name -> serializeAttribute(attributeKeyFactory, name));
-
-    try {
-      return entities.collect(Collectors.toList());
-    } catch (UncheckedIOException e) {
-      throw e.getCause();
-    }
-  }
-
-  /**
-   * Serialize an attribute an embed it into an entity whose key is generated by the provided
-   * KeyFactory.
-   * @param attributeKeyFactory The KeyFactory to use to create the key for the entity.
-   * @param name The name of the attribute to serialize.
-   * @return An Entity containing the serialized attribute.
-   */
-  private Entity serializeAttribute(KeyFactory attributeKeyFactory, String name) {
+  @Override
+  protected Entity serializeAttribute(Function<String, Key> attributeKeyFunction, String name) {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
       oos.writeObject(getAttribute(name));
@@ -207,7 +100,7 @@ public class DatastoreSession extends StandardSession {
       throw new UncheckedIOException(e);
     }
 
-    return Entity.newBuilder(attributeKeyFactory.newKey(name))
+    return Entity.newBuilder(attributeKeyFunction.apply(name))
         .set(SessionMetadata.ATTRIBUTE_VALUE_NAME,
             BlobValue.newBuilder(Blob.copyFrom(bos.toByteArray()))
                 .setExcludeFromIndexes(true)
@@ -215,29 +108,4 @@ public class DatastoreSession extends StandardSession {
         .build();
   }
 
-  /**
-   * List the attributes that were present at the beginning of the request and suppressed during
-   * its execution. This is used to reflect the suppression of attributes in the Datastore (The
-   * suppressed attributes would be left unchanged in the Datastore otherwise).
-   * @return A set of the suppressed attributes.
-   */
-  public Set<String> getSuppressedAttributes() {
-    Set<String> suppressedAttribute = new HashSet<>(initialAttributes);
-    suppressedAttribute.removeAll(Collections.list(getAttributeNames()));
-    return suppressedAttribute;
-  }
-
-  @Override
-  public Object getAttribute(String name) {
-    accessedAttributes.add(name);
-    return super.getAttribute(name);
-  }
-
-  @Override
-  public void setAttribute(String name, Object value, boolean notify) {
-    super.setAttribute(name, value, notify);
-    if (notify) {
-      accessedAttributes.add(name);
-    }
-  }
 }
