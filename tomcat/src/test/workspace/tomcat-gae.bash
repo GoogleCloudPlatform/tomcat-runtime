@@ -10,7 +10,7 @@ if [ "$(cat /config/gcp.xml)" != "$(cat ${CATALINA_BASE}/conf/gcp.xml)" ]; then
 fi
 
 # Test the JAVA_OPTS for cloud debugging
-EXPECTED_DBG_AGENT="-agentpath:/opt/cdbg/cdbg_java_agent.so=--log_dir=/var/log/app_engine,--alsologtostderr=true,--cdbg_extra_class_path=${CATALINA_BASE}/webapps/root/WEB-INF/classes:${CATALINA_BASE}/webapps/root/WEB-INF/lib"
+EXPECTED_DBG_AGENT="-agentpath:/opt/cdbg/cdbg_java_agent.so=--log_dir=/var/log/app_engine,--alsologtostderr=true,--cdbg_extra_class_path=${CATALINA_BASE}/webapps/ROOT/WEB-INF/classes:${CATALINA_BASE}/webapps/ROOT/WEB-INF/lib"
 ACTUAL_DBG_AGENT="$(export GAE_INSTANCE=instance; /docker-entrypoint.bash env | grep DBG_AGENT | cut -d '=' -f 1 --complement)"
 
 if [ "$ACTUAL_DBG_AGENT" != "$EXPECTED_DBG_AGENT" ]; then

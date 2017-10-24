@@ -3,7 +3,7 @@
 # Unpack a WAR app (if present) beforehand so that Stackdriver Debugger
 # can load it. This should be done before the JVM for Tomcat starts up.
 export ROOT_WAR=$CATALINA_BASE/webapps/ROOT.war
-export ROOT_DIR=$CATALINA_BASE/webapps/root
+export ROOT_DIR=$CATALINA_BASE/webapps/ROOT
 if [ -e "$ROOT_WAR" ]; then
   # Unpack it only if $ROOT_DIR doesn't exist or the root is older than the war.
   if [ -e "$ROOT_WAR" -a \( \( ! -e "$ROOT_DIR" \) -o \( "$ROOT_DIR" -ot "$ROOT_WAR" \) \) ]; then
