@@ -18,6 +18,11 @@ commandTests:
   command: [ '/workspace/tomcat/src/test/workspace/tomcat-gae.bash' ]
   expectedOutput: ['OK']
   exitCode: 0
+- name: 'Check tomcat ROOT.war unpack'
+  setup: [[ 'chmod', '+x', '/workspace/tomcat/src/test/workspace/tomcat-unpack.bash' ]]
+  command: [ '/workspace/tomcat/src/test/workspace/tomcat-unpack.bash' ]
+  expectedOutput: ['OK']
+  exitCode: 0
 
 fileExistenceTests:
 - name: 'Tomcat home exists'
