@@ -52,7 +52,7 @@
     <Engine name="Catalina" defaultHost="localhost">
 
       <Host name="localhost"  appBase="webapps"
-          unpackWARs="true" autoDeploy="true">
+          unpackWARs="false" autoDeploy="true">
 
         &trace-requests;
 
