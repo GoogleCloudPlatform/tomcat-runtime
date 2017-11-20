@@ -10,9 +10,9 @@ commandTests:
 - name: 'Catalina script is executable'
   command: ['find', '${tomcat.home}/bin/catalina.sh', '-executable']
   expectedOutput: ['catalina.sh']
-- name: 'APP_DESTINATION is set'
+- name: 'APP_DESTINATION_PATH is set'
   command: ['env']
-  expectedOutput: ['APP_DESTINATION=${tomcat.base}/webapps/']
+  expectedOutput: ['APP_DESTINATION_PATH=${tomcat.base}/webapps/']
 - name: 'APP_WAR is set'
   command: ['env']
   expectedOutput: ['APP_WAR=ROOT.war']
@@ -22,6 +22,9 @@ commandTests:
 - name: 'APP_DESTINATION_WAR is set'
   command: ['env']
   expectedOutput: ['APP_DESTINATION_WAR=${tomcat.base}/webapps/ROOT.war']
+- name: 'APP_DESTINATION is set'
+  command: ['env']
+  expectedOutput: ['APP_DESTINATION=${tomcat.base}/webapps/ROOT.war']
 - name: 'APP_DESTINATION_EXPLODED_WAR is set'
   command: ['env']
   expectedOutput: ['APP_DESTINATION_EXPLODED_WAR=${tomcat.base}/webapps/ROOT/']
