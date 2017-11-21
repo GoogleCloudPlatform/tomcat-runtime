@@ -36,11 +36,17 @@ Then create a `Dockerfile` that uses the Tomcat runtime image as specified in [O
 
 ### Other platforms
 
-Create a `Dockerfile` based on the image and add your application WAR as `ROOT.war` to the current working directory.
+Create a `Dockerfile` based on the image and add your application WAR:
 
 ```dockerfile
 FROM gcr.io/google-appengine/tomcat
-COPY your-application.war ROOT.war
+COPY your-application.war $APP_DESTINATION_WAR
+```
+
+You can also use an exploded-war:
+
+```dockerfile
+COPY your-application $APP_DESTINATION_EXPLODED_WAR
 ```
 
 ## Configuring Tomcat
@@ -58,11 +64,13 @@ You can do so by adding `USER tomcat` at the end of your Dockerfile.
 
 ```dockerfile
 FROM gcr.io/google-appengine/tomcat
-COPY your-application.war ROOT.war
+COPY your-application.war $APP_DESTINATION_WAR
 
-RUN chown tomcat:tomcat $CATALINA_BASE/webapps/ROOT.war
+RUN chown tomcat:tomcat $APP_DESTINATION_WAR
 USER tomcat
 ```
+
+If you are using an exploded-war, then use the `$APP_DESTINATION_EXPLODED_WAR` environment variable instead.
 
 ## Optional Features
 ### Distributed sessions
