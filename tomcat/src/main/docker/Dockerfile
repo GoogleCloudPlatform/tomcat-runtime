@@ -37,7 +37,14 @@ RUN mkdir -p $CATALINA_BASE/webapps \
     && chmod -R 400 $CATALINA_BASE/conf
 
 # Set path where apps should be added to the container
-ENV APP_DESTINATION ${CATALINA_BASE}/webapps/ROOT.war
+ENV APP_WAR ROOT.war
+ENV APP_EXPLODED_WAR ROOT/
+ENV APP_DESTINATION_PATH $CATALINA_BASE/webapps/
+ENV APP_DESTINATION_WAR $APP_DESTINATION_PATH$APP_WAR
+ENV APP_DESTINATION_EXPLODED_WAR $APP_DESTINATION_PATH$APP_EXPLODED_WAR
+
+# This env var is here to not break users of previous versions where only a .war was expected
+ENV APP_DESTINATION $APP_DESTINATION_WAR
 
 WORKDIR $CATALINA_BASE/webapps
 
