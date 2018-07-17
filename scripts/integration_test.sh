@@ -47,7 +47,7 @@ readonly DEPLOYED_APP_URL="https://${service}-dot-$(gcloud app describe | grep d
 echo "Running integration tests on application that is deployed at $DEPLOYED_APP_URL"
 
 # run in cloud container builder
-gcloud container builds submit \
+gcloud builds submit \
   --config $testAppDir/target/cloudbuild/integration.yaml \
   --substitutions "_DEPLOYED_APP_URL=$DEPLOYED_APP_URL" \
   --timeout=25m \
