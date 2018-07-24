@@ -32,7 +32,7 @@ fi
 
 IMAGE="${DOCKER_NAMESPACE}/${RUNTIME_NAME}:${DOCKER_TAG}"
 
-gcloud container builds submit \
+gcloud builds submit \
         --config ${dir}/release-cloudbuild.yaml \
         --substitutions="_IMAGE=$IMAGE,_DOCKER_TAG=$DOCKER_TAG" \
         ${projectRoot}
