@@ -30,13 +30,12 @@ import org.apache.catalina.valves.ValveBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-
 /**
  * This valve uses the Store Manager to persist the session after each request.
  */
-public class DatastoreValve extends ValveBase {
+public class KeyValuePersistentValve extends ValveBase {
 
-  private static final Log log = LogFactory.getLog(DatastoreValve.class);
+  private static final Log log = LogFactory.getLog(KeyValuePersistentValve.class);
 
   private String uriExcludePattern;
 

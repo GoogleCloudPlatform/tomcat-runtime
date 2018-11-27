@@ -1,4 +1,4 @@
-<Valve className="com.google.cloud.runtimes.tomcat.session.DatastoreValve"
+<Valve className="com.google.cloud.runtimes.tomcat.session.KeyValuePersistentValve"
        uriExcludePattern="${gcp.distributed-sessions.uriExcludePattern}" />
 <Manager className="com.google.cloud.runtimes.tomcat.session.DatastoreManager" >
   <Store className="com.google.cloud.runtimes.tomcat.session.DatastoreStore"

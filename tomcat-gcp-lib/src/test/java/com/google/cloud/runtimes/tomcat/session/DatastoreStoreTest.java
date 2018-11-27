@@ -192,7 +192,7 @@ public class DatastoreStoreTest {
     KeyFactory attributeKeyFactory = datastore.newKeyFactory()
         .setKind("kind")
         .addAncestor(PathElement.of("kind", key.getName()));
-    List<Entity> entities = session.saveToEntities(key, attributeKeyFactory);
+    List<Entity> entities = session.saveToEntities(key, DatastoreStore.getAttributeKeyFunctionFromFactory(attributeKeyFactory));
 
     QueryResults<Entity> queryResults = new IteratorQueryResults<>(entities.iterator());
     when(datastore.<Entity>run(any())).thenReturn(queryResults);
@@ -217,7 +217,7 @@ public class DatastoreStoreTest {
         .addAncestor(PathElement.of("kind", key.getName()));
 
     List<Entity> initialSessionEntities = store.serializeSession(initialSession, key,
-        attributeKeyFactory);
+        DatastoreStore.getAttributeKeyFunctionFromFactory(attributeKeyFactory));
 
     // Load the session and remove the map attribute
     when(datastore.<Entity>run(any())).thenReturn(

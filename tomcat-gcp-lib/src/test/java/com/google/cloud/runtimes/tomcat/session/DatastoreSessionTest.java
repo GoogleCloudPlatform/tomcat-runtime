@@ -11,7 +11,6 @@ import com.google.cloud.datastore.Blob;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
-import com.google.cloud.runtimes.tomcat.session.DatastoreSession.SessionMetadata;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.NotSerializableException;
@@ -21,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.catalina.Context;
 import org.apache.catalina.Manager;
@@ -49,12 +49,12 @@ public class DatastoreSessionTest {
   @Test
   public void testMetadataDeserialization() throws Exception {
     Entity metadata = Entity.newBuilder(sessionKey)
-        .set(SessionMetadata.MAX_INACTIVE_INTERVAL, 0)
-        .set(SessionMetadata.CREATION_TIME, 1)
-        .set(SessionMetadata.LAST_ACCESSED_TIME, 2)
-        .set(SessionMetadata.IS_NEW, true)
-        .set(SessionMetadata.IS_VALID, true)
-        .set(SessionMetadata.THIS_ACCESSED_TIME, 3)
+        .set(KeyValuePersistentSession.SessionMetadata.MAX_INACTIVE_INTERVAL, 0)
+        .set(KeyValuePersistentSession.SessionMetadata.CREATION_TIME, 1)
+        .set(KeyValuePersistentSession.SessionMetadata.LAST_ACCESSED_TIME, 2)
+        .set(KeyValuePersistentSession.SessionMetadata.IS_NEW, true)
+        .set(KeyValuePersistentSession.SessionMetadata.IS_VALID, true)
+        .set(KeyValuePersistentSession.SessionMetadata.THIS_ACCESSED_TIME, 3)
         .build();
 
     DatastoreSession session = new DatastoreSession(sessionManager);
@@ -98,7 +98,7 @@ public class DatastoreSessionTest {
     session.setAttribute("map", new HashMap<>());
 
     KeyFactory factory = new KeyFactory("project").setKind("kind");
-    List<Entity> entities = session.saveAttributesToEntity(factory);
+    List<Entity> entities = session.saveAttributesToEntity(DatastoreStore.getAttributeKeyFunctionFromFactory(factory));
 
     assertTrue(entities.stream()
         .map(BaseEntity::getKey)
@@ -115,7 +115,7 @@ public class DatastoreSessionTest {
     initialSession.setAttribute("map", Collections.singletonMap("key", "value"));
 
     KeyFactory keyFactory = new KeyFactory("project").setKind("kind");
-    List<Entity> attributes = initialSession.saveToEntities(sessionKey, keyFactory);
+    List<Entity> attributes = initialSession.saveToEntities(sessionKey,DatastoreStore.getAttributeKeyFunctionFromFactory( keyFactory));
 
     DatastoreSession restoredSession = new DatastoreSession(sessionManager);
     restoredSession.restoreFromEntities(sessionKey, attributes);
@@ -135,7 +135,7 @@ public class DatastoreSessionTest {
     when(session.isAttributeDistributable(any(), any())).thenReturn(true);
     when(session.getAttribute("count")).thenReturn(sessionManager);
 
-    session.saveAttributesToEntity(new KeyFactory("project").setKind("kind"));
+    session.saveAttributesToEntity(DatastoreStore.getAttributeKeyFunctionFromFactory(new KeyFactory("project").setKind("kind")));
   }
 
   @Test(expected = IOException.class)
